@@ -8,7 +8,6 @@ import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
   imports: [
-    AuthModule,
     ConfigModule.forRoot({
       load: [configuration]
     }),
@@ -21,6 +20,7 @@ import { AuthModule } from './modules/auth/auth.module';
       }),
       inject: [ConfigService],
      }),
+     AuthModule
   ],
   controllers: [AppController],
   providers: [AppService],

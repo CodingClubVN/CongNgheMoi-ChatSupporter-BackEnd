@@ -1,13 +1,9 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import { Account } from "./models/account.interface";
-
-
+import { Account } from "./models/account.model";
+import { Document} from 'mongoose';
 @Schema()
 export class User extends Document {
-
-    @Prop({required: true, unique: true, message: 'id must be unique!'})
-    id: string;
-
+    
     @Prop({})
     fullname: string;
 
@@ -23,7 +19,7 @@ export class User extends Document {
     @Prop()
     phone: string;
 
-    @Prop()
+    @Prop({type: Account})
     account: Account;
 
     @Prop()
