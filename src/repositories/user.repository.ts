@@ -20,4 +20,14 @@ export class UserRepository {
             throw new InternalServerErrorException(error);
         }
     }
+
+    async findOneByUsername(username) {
+        try {
+            const user = await this.userModel.findOne({"account.username": username});
+            return user;
+        } catch (error) {
+            throw new InternalServerErrorException(error);
+            return null;
+        }
+    }
 }
