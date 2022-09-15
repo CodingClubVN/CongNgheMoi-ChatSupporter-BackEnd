@@ -4,7 +4,7 @@ import { UserController } from './user.controller';
 
 @Module({
     controllers: [UserController],
-    providers: [JwtStrategy],
+    providers: [],
     exports: []
 })
 export class UserModule {}
