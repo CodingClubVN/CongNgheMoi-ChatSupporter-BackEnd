@@ -3,24 +3,25 @@ import { UserCreateDto } from "../../dto/user/user-create.dto";
 import { UserRepository } from "../../repositories/user.repository";
 import * as bcrypt from 'bcrypt';
 import { JwtService } from "@nestjs/jwt";
-import { User } from "src/entity/user.entity";
-import { Account } from "src/entity/models/account.model";
-import { LoginRequest } from "src/dto/auth/loginRequest.dto";
+import { LoginRequestDto } from "src/dto/auth/loginRequest.dto";
 
 @Injectable({})
 export class AuthService {
 
     constructor(private userRepository: UserRepository, private jwtService: JwtService){}
 
-    async login(account: LoginRequest) {
+    async login(account: LoginRequestDto) {
         const user = await this.userRepository.findOneByUsername(account.username);
+        if (!user) {
+            return null;
+        }
         const isMatch = await bcrypt.compare(account.password, user.account.password);
 
         if (isMatch) {
             const payload = {userId: user.id}
-            const accessToken= this.generateToken(payload);
+            const token= this.generateToken(payload);
 
-            return {accessToken};
+            return {token};
         }else {
             return null;
         }
