@@ -42,6 +42,8 @@ export class AuthService {
     }
 
     private generateToken(payload: any): string {
+        console.log(payload);
+        
         return this.jwtService.sign(payload);
     }
 }
