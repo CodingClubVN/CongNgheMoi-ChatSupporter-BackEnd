@@ -7,6 +7,7 @@ import { AuthService } from "./auth.service";
 import { AuthResponseDto } from "../../dto/auth/authResponse.dto";
 import { InternalServerErrorDTO } from "../../dto/errors/internal-server-error.dto";
 import { UserCreatedResponse } from "../../dto/user/user-response.dto";
+import { BadRequestErrorDto } from "../../dto/errors/bad-request-error.dto";
 
 @ApiTags('/api/auth')
 @Controller('api/auth')
@@ -20,13 +21,13 @@ export class AuthController{
     })
     @ApiResponse({
         status: 400,
-        description: 'error',
-        type:  InternalServerErrorDTO,
+        description: 'bad request',
+        type:  BadRequestErrorDto,
         isArray: false
     })
     @ApiResponse({
         status: 500,
-        description: 'error',
+        description: 'error server',
         type:  InternalServerErrorDTO,
         isArray: false
     })
@@ -37,11 +38,11 @@ export class AuthController{
             if (response !== null){
                 return res.status(HttpStatus.OK).json(response);
             }else {
-                return res.status(HttpStatus.BAD_REQUEST).json(new InternalServerErrorDTO({status: 500, body: {error: {message: "Email or password is incorrect!"}}}));
+                return res.status(HttpStatus.BAD_REQUEST).json(new InternalServerErrorDTO());
             }
         }catch(error) {
             console.log(error);
-            return res.status(500).json(new InternalServerErrorDTO({status: 500, body: {error: {message: "Internal server error!"}}}));
+            return res.status(500).json(new InternalServerErrorDTO());
         }
     }
 
@@ -52,8 +53,8 @@ export class AuthController{
     })
     @ApiResponse({
         status: 400,
-        description: 'error',
-        type:  InternalServerErrorDTO,
+        description: 'bad request',
+        type:  BadRequestErrorDto,
         isArray: false
     })
     @ApiResponse({
@@ -69,7 +70,7 @@ export class AuthController{
             return res.status(200).json(new UserCreatedResponse({userId: newUser._id}));
         }catch(error) {
             console.log(error);
-            return res.status(500).json(new InternalServerErrorDTO({status: 500, body: {error: {message: "Internal server error!"}}}));      
+            return res.status(500).json(new InternalServerErrorDTO());  
         }
     }
 }

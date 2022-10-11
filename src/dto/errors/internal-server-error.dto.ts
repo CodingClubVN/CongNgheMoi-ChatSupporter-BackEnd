@@ -2,17 +2,21 @@ import { ApiProperty } from "@nestjs/swagger";
 
 export class InternalServerErrorDTO {
     
-    @ApiProperty()
-    status: number;
+    @ApiProperty({
+        default: 500
+    })
+    statusCode: number;
 
-    @ApiProperty()
-    body: {
-        error: {
-            message: string;
+    @ApiProperty({
+        default: "Internal Server Error!"
+    })
+    error: string;
+
+    constructor() {
+        const partial: Partial<InternalServerErrorDTO> = {
+            statusCode: 500,
+            error: "Internal Server Error!"
         }
-    }
-
-    constructor(partial: Partial<InternalServerErrorDTO>) {
         Object.assign(this, partial);
     }
 }
