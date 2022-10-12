@@ -17,7 +17,7 @@ export class BadRequestErrorDto {
 
     constructor(message: string[]) {
         const partial: Partial<BadRequestErrorDto> = {
-            statusCode: 500,
+            statusCode: 400,
             error: "Bad request!",
             message: message
         }
