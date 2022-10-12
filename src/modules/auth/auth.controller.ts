@@ -1,13 +1,9 @@
 import { Body, Controller, HttpStatus, Post, Res } from "@nestjs/common";
 import { ApiOkResponse, ApiResponse, ApiTags } from "@nestjs/swagger/dist";
 import { Response } from "express";
-import { LoginRequestDto } from "../../dto/auth/loginRequest.dto";
-import { UserCreateDto } from "../../dto/user/user-create.dto";
+import { AuthResponseDto, BadRequestErrorDto, InternalServerErrorDTO, LoginRequestDto, UserCreatedResponse, UserCreateDto } from "../../dto";
 import { AuthService } from "./auth.service";
-import { AuthResponseDto } from "../../dto/auth/authResponse.dto";
-import { InternalServerErrorDTO } from "../../dto/errors/internal-server-error.dto";
-import { UserCreatedResponse } from "../../dto/user/user-response.dto";
-import { BadRequestErrorDto } from "../../dto/errors/bad-request-error.dto";
+
 
 @ApiTags('/api/auth')
 @Controller('api/auth')
@@ -38,7 +34,7 @@ export class AuthController{
             if (response !== null){
                 return res.status(HttpStatus.OK).json(response);
             }else {
-                return res.status(HttpStatus.BAD_REQUEST).json(new InternalServerErrorDTO());
+                return res.status(HttpStatus.BAD_REQUEST).json(new BadRequestErrorDto(["Incorrect password!"]));
             }
         }catch(error) {
             console.log(error);
