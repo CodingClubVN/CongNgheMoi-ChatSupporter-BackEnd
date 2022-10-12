@@ -1,6 +1,7 @@
 import { Body, Controller, HttpStatus, Post, Res } from "@nestjs/common";
 import { ApiOkResponse, ApiResponse, ApiTags } from "@nestjs/swagger/dist";
 import { Response } from "express";
+import { UserValidation } from "../../validations";
 import { AuthResponseDto, BadRequestErrorDto, InternalServerErrorDTO, LoginRequestDto, UserCreatedResponse, UserCreateDto } from "../../dto";
 import { AuthService } from "./auth.service";
 
@@ -8,7 +9,7 @@ import { AuthService } from "./auth.service";
 @ApiTags('/api/auth')
 @Controller('api/auth')
 export class AuthController{
-    constructor (private authService: AuthService) {}
+    constructor (private authService: AuthService, private userValidation: UserValidation) {}
 
     @ApiOkResponse({
         status: 200,
@@ -62,6 +63,10 @@ export class AuthController{
     @Post('register')
     async register(@Body() userReq: UserCreateDto,  @Res() res: Response) {
         try {
+            const messageValidation = await this.userValidation.checkValidateCreateUser(userReq);
+            if(messageValidation.toString().length) {
+                return res.status(400).json(new BadRequestErrorDto([messageValidation]));
+            }
             const newUser =  await this.authService.register(userReq);
             return res.status(200).json(new UserCreatedResponse({userId: newUser._id}));
         }catch(error) {

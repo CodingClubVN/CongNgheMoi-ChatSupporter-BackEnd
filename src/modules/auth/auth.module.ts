@@ -3,6 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
 import { PassportModule } from '@nestjs/passport';
+import { UserValidation } from '../../validations';
 import configuration from '../../config/configuration';
 import { User, UserSchema } from '../../entity/user.entity';
 import { UserRepository } from '../../repositories/user.repository';
@@ -33,7 +34,7 @@ import { JwtStrategy } from './auth.strategy';
         }),
     ],
     controllers: [AuthController],
-    providers: [AuthService, UserRepository, JwtStrategy],
+    providers: [AuthService, UserRepository, JwtStrategy, UserValidation],
     exports: [AuthService]
 })
 export class AuthModule {}

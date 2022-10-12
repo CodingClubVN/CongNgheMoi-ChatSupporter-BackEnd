@@ -21,11 +21,25 @@ export class UserRepository {
         }
     }
 
-    async findOneByUsername(username) {
+    async findOneByUsername(username: string) {
         try {
             const user = await this.userModel.findOne({"account.username": username});
             return user;
         } catch (error) {
+            throw new InternalServerErrorException(error);
+        }
+    }
+
+    async findByEmailOrEmail(email: string, username: string) {
+        try {
+            const user = await this.userModel.find({
+                $or: [
+                    {email},
+                    {"account.username": username}
+                ]
+            });
+            return user;
+        }catch(error) {
             throw new InternalServerErrorException(error);
         }
     }
