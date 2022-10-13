@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { ConversationCreateDto } from "../../dto";
+import { ConversationCreateDto, FilterParamDto } from "../../dto";
 import { ConversationRepository } from '../../repositories';
 
 
@@ -15,6 +15,14 @@ export class ConversationService {
 
     async addUserToConversation(arrayUserId: string[], conversationId: string) {
         return await this.conversationRepository.addUsersToGroup(arrayUserId, conversationId);
+    }
+    
+    async getConversationId(conversationId: string) {
+        return await this.conversationRepository.getConversationById(conversationId);
+    }
+
+    async findAll(filters: FilterParamDto) {
+        return await this.conversationRepository.getAll(filters);
     }
     
 }
