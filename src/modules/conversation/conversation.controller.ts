@@ -31,8 +31,10 @@ export class ConversationController {
     })
     @Post('')
     @UseGuards(JwtAuthGuard)
-    async getUser(@Res() res: Response, @Body() conversationReq: ConversationCreateDto) {
+    async createConversation(@Req() req,@Res() res: Response, @Body() conversationReq: ConversationCreateDto) {
         try {
+            const userId = req.user['userId'];
+            conversationReq.arrayUserId.push(userId);
             const messageValidation = await this.conversationValidation.checkCreateConversation(conversationReq);
             if (messageValidation.toString().length) {
                 return res.status(400).json(new BadRequestErrorDto([messageValidation]));
@@ -118,8 +120,9 @@ export class ConversationController {
     @UseGuards(JwtAuthGuard)
     async getAllUser(@Req() req, @Res() res: Response, @Query() filters: FilterParamDto) {
         try {
-            const users = await this.conversationService.findAll(filters);
-            return res.status(200).json(users);
+            const userId = req.user['userId'];
+            const conversations = await this.conversationService.findAllByUser(filters, userId);
+            return res.status(200).json(conversations);
         }catch(error) {
             console.log(error);
             return res.status(500).json(new InternalServerErrorDTO());

@@ -20,7 +20,7 @@ export class ConversationRepository {
             for (let userId of conversation.arrayUserId){
                 const user =await this.userModel.findById(userId);
                 users.push({
-                    userId: user._id,
+                    userId: user._id.toString(),
                     username: user.account.username,
                     avatarUrl: user.avatarUrl
                 });
@@ -45,7 +45,7 @@ export class ConversationRepository {
             for (let userId of litsUserId){
                 const user =await this.userModel.findById(userId);
                 users.push({
-                    userId: user._id,
+                    userId: user._id.toString(),
                     username: user.account.username,
                     avatarUrl: user.avatarUrl
                 });
@@ -81,16 +81,17 @@ export class ConversationRepository {
         }
     }
 
-    async getAll(filters: FilterParamDto) {
+    async getAll(filters: FilterParamDto, userId: string) {
         try {
             const page = filters.page ? filters.page : 1;
             const perpage = filters.perPage ? filters.perPage : 10;
             const skip = (page - 1)*perpage; 
             const options = filters.search ? {
-                conversationName: {$regex: filters.search }
-            } : {};
+                conversationName: {$regex: filters.search },
+                "users.userId": userId
+            } : {"users.userId": userId};
             const conversations = await this.conversationModel.find(options, {__v: 0}).skip(skip).limit(perpage).sort({conversationName: 1});
-            const total = await this.conversationModel.count();
+            const total = await this.conversationModel.count({"users.userId": userId});
             const data = new ListConversationResponseDto({total, data: conversations});
             return data;
         }catch(error) {

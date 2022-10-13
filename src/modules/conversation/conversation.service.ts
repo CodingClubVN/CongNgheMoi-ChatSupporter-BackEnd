@@ -21,8 +21,8 @@ export class ConversationService {
         return await this.conversationRepository.getConversationById(conversationId);
     }
 
-    async findAll(filters: FilterParamDto) {
-        return await this.conversationRepository.getAll(filters);
+    async findAllByUser(filters: FilterParamDto, userId: string) {
+        return await this.conversationRepository.getAll(filters, userId);
     }
     
 }
