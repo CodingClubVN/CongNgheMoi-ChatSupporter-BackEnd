@@ -1,8 +1,8 @@
-import { Controller, Get, HttpStatus, Post, Req, Res, UseGuards, Body, Param, Put } from "@nestjs/common";
+import { Controller, Get, HttpStatus, Post, Req, Res, UseGuards, Body, Param, Put, Query } from "@nestjs/common";
 import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiParam, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { Request, Response } from "express";
 import { ConversationValidation } from "../../validations";
-import { BadRequestErrorDto, ConversationAddUserDto, ConversationCreateDto, ConversationCreateResponseDto, InternalServerErrorDTO, Successful } from "../../dto";
+import { BadRequestErrorDto, ConversationAddUserDto, ConversationCreateDto, ConversationCreateResponseDto, ConversationResponseDto, FilterParamDto, InternalServerErrorDTO, ListConversationResponseDto, Successful } from "../../dto";
 import { JwtAuthGuard } from "../auth/auth.guard";
 import { ConversationService } from "./conversation.service";
 
@@ -72,6 +72,54 @@ export class ConversationController {
             const arrayUserId = reqBody.arrayUserId;
             await this.conversationService.addUserToConversation(arrayUserId, conversationId);
             return res.status(HttpStatus.OK).json(new Successful("add user to conversation successful!"))
+        }catch(error) {
+            console.log(error);
+            return res.status(500).json(new InternalServerErrorDTO());
+        }
+    }
+
+    @ApiOkResponse({
+        status: 200,
+        type:  ConversationResponseDto,
+        isArray: false
+    })
+    @ApiResponse({
+        status: 500,
+        description: 'error',
+        type:  InternalServerErrorDTO,
+        isArray: false
+    })
+    @ApiOperation({ summary: 'get detail conversation' })
+    @ApiParam({name: 'conversationId', required: true})
+    @Get(':conversationId')
+    @UseGuards(JwtAuthGuard)
+    async getConversationById(@Res() res: Response, @Param('conversationId') conversationId) {
+        try {
+            const conversation = await this.conversationService.getConversationId(conversationId);
+            return res.status(HttpStatus.OK).json(conversation);
+        }catch(error) {
+            console.log(error);
+            return res.status(500).json(new InternalServerErrorDTO());
+        }
+    }
+
+    @ApiOkResponse({
+        status: 200,
+        type:  ListConversationResponseDto,
+    })
+    @ApiResponse({
+        status: 500,
+        description: 'error',
+        type:  InternalServerErrorDTO,
+        isArray: false
+    })
+    @Get('')
+    @ApiOperation({ summary: 'get all conversation' })
+    @UseGuards(JwtAuthGuard)
+    async getAllUser(@Req() req, @Res() res: Response, @Query() filters: FilterParamDto) {
+        try {
+            const users = await this.conversationService.findAll(filters);
+            return res.status(200).json(users);
         }catch(error) {
             console.log(error);
             return res.status(500).json(new InternalServerErrorDTO());

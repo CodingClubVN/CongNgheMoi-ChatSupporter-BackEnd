@@ -1,7 +1,7 @@
 import { InternalServerErrorException } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
-import { ConversationCreateDto } from "../dto";
+import { ConversationCreateDto, FilterParamDto, ListConversationResponseDto } from "../dto";
 import { User, Conversation } from "../entity";
 
 
@@ -63,7 +63,9 @@ export class ConversationRepository {
 
     async getConversationById(conversationId: string) {
         try {
-            const conversation = await this.conversationModel.findById(conversationId);
+            const conversation = await this.conversationModel.findById(conversationId, {
+                __v: 0
+            });
             return conversation;
         } catch(error) {
             throw new InternalServerErrorException(error);
@@ -75,6 +77,23 @@ export class ConversationRepository {
             const conversation = await this.conversationModel.findOne({conversationName: conversationName});
             return conversation;
         } catch(error) {
+            throw new InternalServerErrorException(error);
+        }
+    }
+
+    async getAll(filters: FilterParamDto) {
+        try {
+            const page = filters.page ? filters.page : 1;
+            const perpage = filters.perPage ? filters.perPage : 10;
+            const skip = (page - 1)*perpage; 
+            const options = filters.search ? {
+                conversationName: {$regex: filters.search }
+            } : {};
+            const conversations = await this.conversationModel.find(options, {__v: 0}).skip(skip).limit(perpage).sort({conversationName: 1});
+            const total = await this.conversationModel.count();
+            const data = new ListConversationResponseDto({total, data: conversations});
+            return data;
+        }catch(error) {
             throw new InternalServerErrorException(error);
         }
     }
