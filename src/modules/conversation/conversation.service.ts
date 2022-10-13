@@ -12,5 +12,9 @@ export class ConversationService {
         const newConversation = await this.conversationRepository.createConversation(conversation);
         return {conversationId: newConversation._id};
     }
+
+    async addUserToConversation(arrayUserId: string[], conversationId: string) {
+        return await this.conversationRepository.addUsersToGroup(arrayUserId, conversationId);
+    }
     
 }
