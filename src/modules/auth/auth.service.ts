@@ -17,7 +17,7 @@ export class AuthService {
         const isMatch = await bcrypt.compare(account.password, user.account.password);
 
         if (isMatch) {
-            const payload = {userId: user.id}
+            const payload = {userId: user._id}
             const token= this.generateToken(payload);
 
             return {token};

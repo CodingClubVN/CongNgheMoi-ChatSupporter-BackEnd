@@ -9,7 +9,7 @@ export class UserValidation {
     async checkValidateCreateUser(userReq: UserCreateDto) {
         const userCheckUsername = await this.userRepository.findByEmailOrEmailOrPhone(userReq.email, userReq.account.username, userReq.phone);
         if (userCheckUsername.length) {
-            return 'username or email exists!';
+            return 'username or email or phone exists!';
         }
         return '';
     }
