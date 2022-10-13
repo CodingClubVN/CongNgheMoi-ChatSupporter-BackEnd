@@ -30,12 +30,13 @@ export class UserRepository {
         }
     }
 
-    async findByEmailOrEmail(email: string, username: string) {
+    async findByEmailOrEmailOrPhone(email: string, username: string, phone: string) {
         try {
             const user = await this.userModel.find({
                 $or: [
                     {email},
-                    {"account.username": username}
+                    {"account.username": username},
+                    {phone}
                 ]
             });
             return user;
