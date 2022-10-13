@@ -37,21 +37,29 @@ export class ConversationRepository {
         }
     }
 
-    // async addUsersToGroup(litsUserId: string[]) {
-    //     try {
-    //         let users = [];
-    //         for (let userId of litsUserId){
-    //             const user =await this.userModel.findById(userId);
-    //             users.push({
-    //                 userId: user._id,
-    //                 username: user.account.username,
-    //                 avatarUrl: user.avatarUrl
-    //             });
-    //         }
-    //     }catch(error) {
-    //         throw new InternalServerErrorException(error);
-    //     }
-    // }
+    async addUsersToGroup(litsUserId: string[], conversationId: string) {
+        try {
+            const conversation = await this.conversationModel.findById(conversationId);
+            
+            let users = conversation.users;
+            for (let userId of litsUserId){
+                const user =await this.userModel.findById(userId);
+                users.push({
+                    userId: user._id,
+                    username: user.account.username,
+                    avatarUrl: user.avatarUrl
+                });
+            }
+            await this.conversationModel.updateOne(
+                {_id: conversationId},
+                {
+                    $set: ({users: users})
+                }
+            );
+        }catch(error) {
+            throw new InternalServerErrorException(error);
+        }
+    }
 
     async getConversationById(conversationId: string) {
         try {

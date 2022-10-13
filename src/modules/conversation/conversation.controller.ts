@@ -1,8 +1,8 @@
-import { Controller, Get, HttpStatus, Post, Req, Res, UseGuards, Body } from "@nestjs/common";
-import { ApiBearerAuth, ApiOkResponse, ApiResponse, ApiTags } from "@nestjs/swagger";
+import { Controller, Get, HttpStatus, Post, Req, Res, UseGuards, Body, Param, Put } from "@nestjs/common";
+import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiParam, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { Request, Response } from "express";
 import { ConversationValidation } from "../../validations";
-import { BadRequestErrorDto, ConversationCreateDto, ConversationCreateResponseDto, InternalServerErrorDTO } from "../../dto";
+import { BadRequestErrorDto, ConversationAddUserDto, ConversationCreateDto, ConversationCreateResponseDto, InternalServerErrorDTO, Successful } from "../../dto";
 import { JwtAuthGuard } from "../auth/auth.guard";
 import { ConversationService } from "./conversation.service";
 
@@ -39,6 +39,39 @@ export class ConversationController {
             }
             const result = await this.conversationService.createConversation(conversationReq);
             return res.status(200).json(new ConversationCreateResponseDto({conversationId: result.conversationId}));
+        }catch(error) {
+            console.log(error);
+            return res.status(500).json(new InternalServerErrorDTO());
+        }
+    }
+
+
+    @ApiOkResponse({
+        status: 200,
+        type:  Successful,
+        isArray: false
+    })
+    @ApiResponse({
+        status: 400,
+        description: 'bad request',
+        type:  BadRequestErrorDto,
+        isArray: false
+    })
+    @ApiResponse({
+        status: 500,
+        description: 'error',
+        type:  InternalServerErrorDTO,
+        isArray: false
+    })
+    @ApiOperation({ summary: 'add user to conversation' })
+    @ApiParam({name: 'conversationId', required: true})
+    @Put(':conversationId/add-user')
+    @UseGuards(JwtAuthGuard)
+    async addUserToConversation(@Res() res: Response, @Body() reqBody: ConversationAddUserDto, @Param('conversationId') conversationId) {
+        try {
+            const arrayUserId = reqBody.arrayUserId;
+            await this.conversationService.addUserToConversation(arrayUserId, conversationId);
+            return res.status(HttpStatus.OK).json(new Successful("add user to conversation successful!"))
         }catch(error) {
             console.log(error);
             return res.status(500).json(new InternalServerErrorDTO());
