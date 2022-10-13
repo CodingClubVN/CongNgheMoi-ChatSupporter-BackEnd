@@ -1,24 +1,38 @@
 import { Controller, Get, HttpStatus, Req, Res, UseGuards } from "@nestjs/common";
-import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiOkResponse, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { Request, Response } from "express";
+import { InternalServerErrorDTO, UserResponseDto } from "../../dto";
 import { JwtAuthGuard } from "../auth/auth.guard";
+import { UserService } from "./user.service";
 
 @ApiBearerAuth()
 @ApiTags('api/user')
 @Controller('api/user')
 export class UserController {
-    constructor(){}
+    constructor(private userService: UserService){}
 
-    @Get('')
+    @ApiOkResponse({
+        status: 200,
+        type:  UserResponseDto,
+        isArray: false
+    })
+    @ApiResponse({
+        status: 500,
+        description: 'error',
+        type:  InternalServerErrorDTO,
+        isArray: false
+    })
+    @Get('/me')
     @UseGuards(JwtAuthGuard)
-    async getUser(@Req() req: Request, @Res() res: Response) {
+    async getUserDeltail(@Req() req: Request, @Res() res: Response) {
         try {
-            console.log(req.user);
-            
-            return res.status(HttpStatus.OK).json(req.user);
+            const userId = req.user['userId'];
+            const user = await this.userService.findById(userId);
+            return res.status(HttpStatus.OK).json(user);
         }catch(error) {
             console.log(error);
-            return res.send(error);
+            return res.status(500).json(new InternalServerErrorDTO());
         }
     }
+
 }

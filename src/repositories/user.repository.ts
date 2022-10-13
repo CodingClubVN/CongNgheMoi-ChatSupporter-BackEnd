@@ -44,4 +44,16 @@ export class UserRepository {
             throw new InternalServerErrorException(error);
         }
     }
+
+    async findById(userId: string) {
+        try {
+            const user = await this.userModel.findById(userId, {
+                __v: 0,
+                "account.password": 0
+            });
+            return user;
+        }catch(error) {
+            throw new InternalServerErrorException(error);
+        }
+    }
 }
