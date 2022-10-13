@@ -1,4 +1,5 @@
 import { Injectable } from "@nestjs/common";
+import { FilterParamDto } from "src/dto";
 import { UserRepository } from "../../repositories";
 
 @Injectable({})
@@ -9,6 +10,9 @@ export class UserService {
     async findById(userId: string) {
         return await this.userRepository.findById(userId);
     }
-  
+    
+    async findAll(filters: FilterParamDto) {
+        return await this.userRepository.findAll(filters);
+    }
     
 }

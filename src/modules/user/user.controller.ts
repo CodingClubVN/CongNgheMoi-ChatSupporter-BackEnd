@@ -1,13 +1,13 @@
-import { Controller, Get, HttpStatus, Req, Res, UseGuards } from "@nestjs/common";
+import { Controller, Get, HttpStatus,Query, Req, Res, UseGuards } from "@nestjs/common";
 import { ApiBearerAuth, ApiOkResponse, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { Request, Response } from "express";
-import { InternalServerErrorDTO, UserResponseDto } from "../../dto";
+import { FilterParamDto, InternalServerErrorDTO, ListUserResponse, UserResponseDto } from "../../dto";
 import { JwtAuthGuard } from "../auth/auth.guard";
 import { UserService } from "./user.service";
 
 @ApiBearerAuth()
-@ApiTags('api/user')
-@Controller('api/user')
+@ApiTags('api/users')
+@Controller('api/users')
 export class UserController {
     constructor(private userService: UserService){}
 
@@ -35,4 +35,26 @@ export class UserController {
         }
     }
 
+    
+    @ApiOkResponse({
+        status: 200,
+        type:  ListUserResponse,
+    })
+    @ApiResponse({
+        status: 500,
+        description: 'error',
+        type:  InternalServerErrorDTO,
+        isArray: false
+    })
+    @Get('')
+    @UseGuards(JwtAuthGuard)
+    async getAllUser(@Req() req, @Res() res: Response, @Query() filters: FilterParamDto) {
+        try {
+            const users = await this.userService.findAll(filters);
+            return res.status(200).json(users);
+        }catch(error) {
+            console.log(error);
+            return res.status(500).json(new InternalServerErrorDTO());
+        }
+    }
 }
