@@ -4,13 +4,15 @@ services:
     prod:
         container_name: nestjs_api_prod
         image: nestjs-api-prod:1.0.0
+        environment:
+            URL_MONGO_DB: ${URL_MONGO_DB}
+            SECRET_TOKEN: ${SECRET_TOKEN}
+            EXPIRESIN_TOKEN: ${EXPIRESIN_TOKEN}
         build:
             context: .
             dockerfile: Dockerfile
             args:
                 - NODE_ENV=production
-            env_file:
-                - .env
         command: npm run start:prod
         ports:
             - 5000:5000
