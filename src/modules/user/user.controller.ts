@@ -1,24 +1,60 @@
-import { Controller, Get, HttpStatus, Req, Res, UseGuards } from "@nestjs/common";
-import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
+import { Controller, Get, HttpStatus,Query, Req, Res, UseGuards } from "@nestjs/common";
+import { ApiBearerAuth, ApiOkResponse, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { Request, Response } from "express";
+import { FilterParamDto, InternalServerErrorDTO, ListUserResponse, UserResponseDto } from "../../dto";
 import { JwtAuthGuard } from "../auth/auth.guard";
+import { UserService } from "./user.service";
 
 @ApiBearerAuth()
-@ApiTags('api/user')
-@Controller('api/user')
+@ApiTags('api/users')
+@Controller('api/users')
 export class UserController {
-    constructor(){}
+    constructor(private userService: UserService){}
 
-    @Get('')
+    @ApiOkResponse({
+        status: 200,
+        type:  UserResponseDto,
+        isArray: false
+    })
+    @ApiResponse({
+        status: 500,
+        description: 'error',
+        type:  InternalServerErrorDTO,
+        isArray: false
+    })
+    @Get('/me')
     @UseGuards(JwtAuthGuard)
-    async getUser(@Req() req: Request, @Res() res: Response) {
+    async getUserDeltail(@Req() req: Request, @Res() res: Response) {
         try {
-            console.log(req.user);
-            
-            return res.status(HttpStatus.OK).json(req.user);
+            const userId = req.user['userId'];
+            const user = await this.userService.findById(userId);
+            return res.status(HttpStatus.OK).json(user);
         }catch(error) {
             console.log(error);
-            return res.send(error);
+            return res.status(500).json(new InternalServerErrorDTO());
+        }
+    }
+
+    
+    @ApiOkResponse({
+        status: 200,
+        type:  ListUserResponse,
+    })
+    @ApiResponse({
+        status: 500,
+        description: 'error',
+        type:  InternalServerErrorDTO,
+        isArray: false
+    })
+    @Get('')
+    @UseGuards(JwtAuthGuard)
+    async getAllUser(@Req() req, @Res() res: Response, @Query() filters: FilterParamDto) {
+        try {
+            const users = await this.userService.findAll(filters);
+            return res.status(200).json(users);
+        }catch(error) {
+            console.log(error);
+            return res.status(500).json(new InternalServerErrorDTO());
         }
     }
 }
