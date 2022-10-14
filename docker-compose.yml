@@ -6,8 +6,9 @@ services:
         image: nestjs-api-prod:1.0.0
         build:
             context: .
-            target: production
-            dockerfile: ./Dockerfile
+            dockerfile: Dockerfile
+            args:
+                - NODE_ENV=production
         command: npm run start:prod
         ports:
             - 5000:5000
