@@ -3,6 +3,7 @@ import { ConfigModule,ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import configuration from './config/configuration';
 import { AuthModule } from './modules/auth/auth.module';
+import GoogleAuthModule from './modules/auth/google/google.module';
 import { ConversationModule } from './modules/conversation/conversation.module';
 import { UserModule } from './modules/user/user.module';
 
@@ -22,7 +23,8 @@ import { UserModule } from './modules/user/user.module';
      }),
      AuthModule,
      UserModule,
-     ConversationModule
+     ConversationModule,
+     GoogleAuthModule
   ],
   controllers: [],
   providers: [],
