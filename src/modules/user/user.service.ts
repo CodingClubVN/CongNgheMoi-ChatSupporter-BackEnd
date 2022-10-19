@@ -14,5 +14,5 @@ export class UserService {
     async findAll(filters: FilterParamDto) {
         return await this.userRepository.findAll(filters);
     }
-    
+
 }

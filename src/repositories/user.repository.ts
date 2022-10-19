@@ -77,4 +77,9 @@ export class UserRepository {
             throw new InternalServerErrorException(error);
         }
     }
+    // async update(userId: string, user: any) {
+    //     try{
+    //         const userFinal= await this.userModel.findByIdAndUpdate(userId, user, {new: true});
+    //     }
+    
 }

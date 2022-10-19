@@ -1,7 +1,7 @@
 import { InternalServerErrorException } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
-import { ConversationCreateDto, FilterParamDto, ListConversationResponseDto } from "../dto";
+import { ConversationCreateDto, FilterParamDto, ListConversationResponseDto,ConversationUpdateDto } from "../dto";
 import { User, Conversation } from "../entity";
 
 
@@ -10,15 +10,15 @@ export class ConversationRepository {
     constructor(
         @InjectModel(Conversation.name) private readonly conversationModel: Model<Conversation>,
         @InjectModel(User.name) private readonly userModel: Model<User>
-    ){
+    ) {
 
     }
 
     async createConversation(conversation: ConversationCreateDto) {
         try {
             let users = [];
-            for (let userId of conversation.arrayUserId){
-                const user =await this.userModel.findById(userId);
+            for (let userId of conversation.arrayUserId) {
+                const user = await this.userModel.findById(userId);
                 users.push({
                     userId: user._id.toString(),
                     username: user.account.username,
@@ -32,7 +32,7 @@ export class ConversationRepository {
                 }
             ).save();
             return newConversation;
-        }catch(error) {
+        } catch (error) {
             throw new InternalServerErrorException(error);
         }
     }
@@ -40,10 +40,10 @@ export class ConversationRepository {
     async addUsersToGroup(litsUserId: string[], conversationId: string) {
         try {
             const conversation = await this.conversationModel.findById(conversationId);
-            
+
             let users = conversation.users;
-            for (let userId of litsUserId){
-                const user =await this.userModel.findById(userId);
+            for (let userId of litsUserId) {
+                const user = await this.userModel.findById(userId);
                 users.push({
                     userId: user._id.toString(),
                     username: user.account.username,
@@ -51,12 +51,12 @@ export class ConversationRepository {
                 });
             }
             await this.conversationModel.updateOne(
-                {_id: conversationId},
+                { _id: conversationId },
                 {
-                    $set: ({users: users})
+                    $set: ({ users: users })
                 }
             );
-        }catch(error) {
+        } catch (error) {
             throw new InternalServerErrorException(error);
         }
     }
@@ -67,16 +67,16 @@ export class ConversationRepository {
                 __v: 0
             });
             return conversation;
-        } catch(error) {
+        } catch (error) {
             throw new InternalServerErrorException(error);
         }
     }
 
     async getConversationByName(conversationName: string) {
         try {
-            const conversation = await this.conversationModel.findOne({conversationName: conversationName});
+            const conversation = await this.conversationModel.findOne({ conversationName: conversationName });
             return conversation;
-        } catch(error) {
+        } catch (error) {
             throw new InternalServerErrorException(error);
         }
     }
@@ -85,16 +85,29 @@ export class ConversationRepository {
         try {
             const page = filters.page ? filters.page : 1;
             const perpage = filters.perPage ? filters.perPage : 10;
-            const skip = (page - 1)*perpage; 
+            const skip = (page - 1) * perpage;
             const options = filters.search ? {
-                conversationName: {$regex: filters.search },
+                conversationName: { $regex: filters.search },
                 "users.userId": userId
-            } : {"users.userId": userId};
-            const conversations = await this.conversationModel.find(options, {__v: 0}).skip(skip).limit(perpage).sort({conversationName: 1});
-            const total = await this.conversationModel.count({"users.userId": userId});
-            const data = new ListConversationResponseDto({total, data: conversations});
+            } : { "users.userId": userId };
+            const conversations = await this.conversationModel.find(options, { __v: 0 }).skip(skip).limit(perpage).sort({ conversationName: 1 });
+            const total = await this.conversationModel.count({ "users.userId": userId });
+            const data = new ListConversationResponseDto({ total, data: conversations });
             return data;
-        }catch(error) {
+        } catch (error) {
+            throw new InternalServerErrorException(error);
+        }
+    }
+    async updateConversation(conversationId: string, conversation: ConversationUpdateDto) {
+        try {
+            const conversationUpdate = await this.conversationModel.findById(conversationId);
+            conversationUpdate.conversationName = conversation.conversationName;
+            conversationUpdate.updatedAt=new Date();
+            await this.conversationModel.updateOne({
+                __id: conversationId
+            }, conversationUpdate);
+            return conversationUpdate;
+        }catch(error){
             throw new InternalServerErrorException(error);
         }
     }
