@@ -1,12 +1,21 @@
 import {WebSocketGateway, WebSocketServer} from '@nestjs/websockets';
-import {Server} from 'socket.io';
+import {Server, Socket} from 'socket.io';
+import { MessageResponseDto } from '../dto';
 
 @WebSocketGateway()
 export class EventSocketGateway {
 	@WebSocketServer()
 	server: Server;
 
-	public testEmit(test) {
-		this.server.emit('onAdd', {test});
+	constructor() {
+
+	}
+	async handleConnection(client: Socket) {
+		const room = client.handshake.query.userId;
+		client.join(room);
+	}
+
+	public emitMessage(message: MessageResponseDto, listroom: string[]) {
+		this.server.in(listroom).emit('new-message', {message});
 	}
 }
