@@ -25,4 +25,7 @@ export class ConversationService {
         return await this.conversationRepository.getAll(filters, userId);
     }
     
+    async updateReadStatus(userId: string, conversationId: string) {
+        await this.conversationRepository.updateReadStatus(userId, conversationId);
+    }
 }

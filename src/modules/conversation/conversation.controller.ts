@@ -118,11 +118,36 @@ export class ConversationController {
     @Get('')
     @ApiOperation({ summary: 'get all conversation' })
     @UseGuards(JwtAuthGuard)
-    async getAllUser(@Req() req, @Res() res: Response, @Query() filters: FilterParamDto) {
+    async getAllConversationByUser(@Req() req, @Res() res: Response, @Query() filters: FilterParamDto) {
         try {
             const userId = req.user['userId'];
             const conversations = await this.conversationService.findAllByUser(filters, userId);
             return res.status(200).json(conversations);
+        }catch(error) {
+            console.log(error);
+            return res.status(500).json(new InternalServerErrorDTO());
+        }
+    }
+
+    @ApiOkResponse({
+        status: 200,
+        type:  Successful,
+    })
+    @ApiResponse({
+        status: 500,
+        description: 'error',
+        type:  InternalServerErrorDTO,
+        isArray: false
+    })
+    @ApiOperation({ summary: 'get detail conversation' })
+    @ApiParam({name: 'conversationId', required: true})
+    @Put(":conversationId/mark-read")
+    @UseGuards(JwtAuthGuard)
+    async updateReadStatus(@Req() req, @Res() res: Response, @Param('conversationId') conversationId) {
+        try {
+            const userId = req.user['userId'];
+            await this.conversationService.updateReadStatus(userId, conversationId);
+            return res.status(200).json(new Successful("updated status successful!"));
         }catch(error) {
             console.log(error);
             return res.status(500).json(new InternalServerErrorDTO());
