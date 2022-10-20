@@ -4,7 +4,9 @@ import { MongooseModule } from '@nestjs/mongoose';
 import configuration from './config/configuration';
 import { AuthModule } from './modules/auth/auth.module';
 import { ConversationModule } from './modules/conversation/conversation.module';
+import { MessageModule } from './modules/message/message.module';
 import { UserModule } from './modules/user/user.module';
+import { EventSocketGateway } from './socket/socket.io';
 
 @Module({
   imports: [
@@ -22,9 +24,11 @@ import { UserModule } from './modules/user/user.module';
      }),
      AuthModule,
      UserModule,
-     ConversationModule
+     ConversationModule,
+     MessageModule
   ],
   controllers: [],
-  providers: [],
+  providers: [EventSocketGateway],
+  exports: [EventSocketGateway]
 })
 export class AppModule {}

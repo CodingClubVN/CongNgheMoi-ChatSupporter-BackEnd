@@ -13,7 +13,7 @@ export class Conversation extends Document {
     @Prop({default: []})
     users: UserModel[];
     
-    @Prop({default: []})
+    @Prop({type: MessageModel,default: []})
     lastMessage: MessageModel;
     
     @Prop({default: []})

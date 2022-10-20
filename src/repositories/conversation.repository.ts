@@ -1,7 +1,8 @@
 import { InternalServerErrorException } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
-import { ConversationCreateDto, FilterParamDto, ListConversationResponseDto,ConversationUpdateDto } from "../dto";
+import { ConversationCreateDto, FilterParamDto, ListConversationResponseDto,ConversationUpdateDto, MessageResponseDto } from "../dto";
+import { MessageModel } from "src/entity/models/message.model";
 import { User, Conversation } from "../entity";
 
 
@@ -110,5 +111,29 @@ export class ConversationRepository {
         }catch(error){
             throw new InternalServerErrorException(error);
         }
+    }
+
+    async updateLastMessageAndClearReadStatusConversation(message: MessageResponseDto, conversationId: string) {
+        const lastMessage = message as MessageModel;
+        await this.conversationModel.updateOne(
+            {_id: conversationId},
+            {
+                $set: ({lastMessage: lastMessage, readStatus: []})
+            }
+        );
+    }
+
+    async updateReadStatus(userId: string, conversationId: string) {
+        const conversation = await this.getConversationById(conversationId);
+        let readStatus = conversation.readStatus;
+        if(!readStatus.includes(userId)){
+            readStatus.push(userId);
+        }
+        await this.conversationModel.updateOne(
+            {_id: conversationId},
+            {
+                $set: ({readStatus: readStatus})
+            }
+        );
     }
 }
