@@ -3,10 +3,9 @@ import { FileInterceptor } from "@nestjs/platform-express";
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOkResponse, ApiParam, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { Request, Response } from "express";
 import { FirebaseUploadUtil } from "../../utils/firebase-upload.util";
-import { FilterParamDto, InternalServerErrorDTO, ListUserResponse, MessageCreateDto, MessageCreateResponseDto, MessageResponseDto, UserResponseDto } from "../../dto";
+import { FilterParamDto, InternalServerErrorDTO, MessageCreateDto, MessageCreateResponseDto, MessageResponseDto } from "../../dto";
 import { JwtAuthGuard } from "../auth/auth.guard";
 import { MessageService } from "./message.service";
-import { EventSocketGateway } from "../../socket/socket.io";
 
 @ApiBearerAuth()
 @ApiTags('api/messages')

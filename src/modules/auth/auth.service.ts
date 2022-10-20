@@ -20,7 +20,7 @@ export class AuthService {
             const payload = {userId: user._id}
             const token= this.generateToken(payload);
 
-            return {token};
+            return {token,userId: user._id};
         }else {
             return null;
         }
