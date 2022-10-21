@@ -7,6 +7,7 @@ export class MessageRepository {
     constructor(@InjectModel(Message.name) private readonly messageModel: Model<Message>) {}
 
     async createMessage(message: MessageCreateDto) {
+        message.createdAt = new Date();
         const newMessage = await new this.messageModel(message).save();
         return newMessage;
     }

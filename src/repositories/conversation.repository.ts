@@ -29,7 +29,8 @@ export class ConversationRepository {
             const newConversation = await new this.conversationModel(
                 {
                     conversationName: conversation.conversationName,
-                    users: users
+                    users: users,
+                    createdAt: new Date()
                 }
             ).save();
             return newConversation;
@@ -48,13 +49,13 @@ export class ConversationRepository {
                 users.push({
                     userId: user._id.toString(),
                     username: user.account.username,
-                    avatarUrl: user.avatarUrl
+                    avatarUrl: user.avatarUrl,
                 });
             }
             await this.conversationModel.updateOne(
                 {_id: conversationId},
                 {
-                    $set: ({users: users})
+                    $set: ({users: users, updatedAt: new Date()})
                 }
             );
         }catch(error) {
@@ -91,7 +92,7 @@ export class ConversationRepository {
                 conversationName: {$regex: filters.search },
                 "users.userId": userId
             } : {"users.userId": userId};
-            const conversations = await this.conversationModel.find(options, {__v: 0}).skip(skip).limit(perpage).sort({conversationName: 1});
+            const conversations = await this.conversationModel.find(options, {__v: 0}).skip(skip).limit(perpage).sort({updatedAt: -1});
             const total = await this.conversationModel.count({"users.userId": userId});
             const data = new ListConversationResponseDto({total, data: conversations});
             return data;
@@ -105,7 +106,7 @@ export class ConversationRepository {
         await this.conversationModel.updateOne(
             {_id: conversationId},
             {
-                $set: ({lastMessage: lastMessage, readStatus: []})
+                $set: ({lastMessage: lastMessage, readStatus: [], updatedAt: new Date()})
             }
         );
     }
@@ -113,9 +114,11 @@ export class ConversationRepository {
     async updateReadStatus(userId: string, conversationId: string) {
         const conversation = await this.getConversationById(conversationId);
         let readStatus = conversation.readStatus;
+
         if(!readStatus.includes(userId)){
             readStatus.push(userId);
         }
+
         await this.conversationModel.updateOne(
             {_id: conversationId},
             {

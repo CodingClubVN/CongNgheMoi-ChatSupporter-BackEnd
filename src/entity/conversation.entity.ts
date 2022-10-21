@@ -13,16 +13,16 @@ export class Conversation extends Document {
     @Prop({default: []})
     users: UserModel[];
     
-    @Prop({type: MessageModel,default: []})
+    @Prop({type: MessageModel,default: null})
     lastMessage: MessageModel;
     
     @Prop({default: []})
     readStatus: Object[];
 
-    @Prop({default: Date.now()})
+    @Prop()
     createdAt: Date;
 
-    @Prop({default: Date.now()})
+    @Prop()
     updatedAt: Date;
 }
 

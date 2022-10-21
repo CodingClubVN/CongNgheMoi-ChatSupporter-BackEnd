@@ -10,4 +10,6 @@ export class MessageCreateDto {
     type?: string;
 
     fromUserId: string;
+
+    createdAt?: Date;
 }
