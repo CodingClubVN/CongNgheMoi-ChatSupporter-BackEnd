@@ -12,6 +12,8 @@ export class EventSocketGateway {
 	}
 	async handleConnection(client: Socket) {
 		const room = client.handshake.query.userId;
+		console.log("user conent: ", room);
+		
 		client.join(room);
 	}
 
@@ -22,11 +24,13 @@ export class EventSocketGateway {
 	@SubscribeMessage('join-room')
 	public handleJoinRoom(client: Socket, data: string) {
 		client.join(data);
+		console.log(client.handshake.query.userId + "join" + data);
 	}
 
 	@SubscribeMessage('leave-room')
 	public handleLeaveRoom(client: Socket, data: string) {
 		client.leave(data);
+		console.log(client.handshake.query.userId + "leave" + data);
 	}
 
 	public emitUpdateConversation(conversationResponse: ConversationResponseDto,listRoom: string[]) {
