@@ -22,10 +22,10 @@ export class UserResponseDto {
     account: AccountResponseDto
 
     @ApiProperty()
-    updatedAt: Date;
+    updatedAt: number;
 
     @ApiProperty()
-    createdAt: Date;
+    createdAt: number;
 
     constructor(partial: Partial<UserResponseDto>) {
         Object.assign(this, partial);

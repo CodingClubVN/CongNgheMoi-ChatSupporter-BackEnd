@@ -18,7 +18,7 @@ export class MessageResponseDto {
     description: string;
 
     @ApiProperty()
-    createdAt: Date;
+    createdAt: Number;
 
     @ApiProperty()
     type: string;

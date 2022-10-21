@@ -6,7 +6,7 @@ export class MessageModel {
     conversationId: string;
 
     @ApiProperty()
-    createdAt: Date;
+    createdAt: Number;
 
     @ApiProperty()
     content: string;
