@@ -14,7 +14,7 @@ export class MessageRepository {
 
     async findAllByConversationId(conversationId: string, filters: FilterParamDto) {
         const page = filters.page ? filters.page : 1;
-        const perpage = filters.perPage ? filters.perPage : 10;
+        const perpage = filters.perPage ? filters.perPage : 30;
         const skip = (page - 1)*perpage; 
         const messages = await this.messageModel.find({conversationId: conversationId}, {
             __v: 0
