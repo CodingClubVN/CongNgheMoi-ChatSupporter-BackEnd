@@ -14,11 +14,11 @@ export class MessageRepository {
 
     async findAllByConversationId(conversationId: string, filters: FilterParamDto) {
         const page = filters.page ? filters.page : 1;
-        const perpage = filters.perPage ? filters.perPage : 10;
+        const perpage = filters.perPage ? filters.perPage : 20;
         const skip = (page - 1)*perpage; 
         const messages = await this.messageModel.find({conversationId: conversationId}, {
             __v: 0
-        }).skip(skip).limit(perpage).sort({createdAt: 1});
+        }).skip(skip).limit(perpage).sort({createdAt: -1});
         return messages;
     }
 }
