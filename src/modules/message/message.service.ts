@@ -19,20 +19,27 @@ export class MessageService {
             fromUserId: newMessage.fromUserId,
             type: newMessage.type
         }
-        const conversation = await this.conversationRepository.getConversationById(message.conversationId);
         let listRoom = [];
-        for (let user of conversation.users) {
-            listRoom.push(user.userId);
-        }
+        listRoom.push(newMessage.conversationId.toString());
         this.socket.emitMessage(data, listRoom);
         delete data._id;
         delete data.description;
-        this.conversationRepository.updateLastMessageAndClearReadStatusConversation(data, message.conversationId);
+        await this.conversationRepository.updateLastMessageAndClearReadStatusConversation(data, message.conversationId);
+        await this.emitUpdateConversation(message.conversationId.toString());
         return newMessage;
     }
 
     async getAllByConversationId (conversationId: string, filters: FilterParamDto){
         return await this.messageRepository.findAllByConversationId(conversationId, filters);
+    }
+
+    async emitUpdateConversation(conversationId: string) {
+        let listRoom= [];
+        const conversation = await this.conversationRepository.getConversationById(conversationId);
+        for (let user of conversation.users) {
+            listRoom.push(user.userId.toString());
+        }
+        this.socket.emitUpdateConversation(conversation, listRoom);
     }
     
 }
