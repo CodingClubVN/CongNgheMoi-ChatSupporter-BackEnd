@@ -1,4 +1,3 @@
-
 export class MessageCreateDto {
 
     conversationId: string;
@@ -11,5 +10,5 @@ export class MessageCreateDto {
 
     fromUserId: string;
 
-    createdAt?: Date;
+    createdAt?: string;
 }
