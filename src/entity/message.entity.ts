@@ -11,7 +11,7 @@ export class Message extends Document {
     conversationId: string;
 
    
-    @Prop({default: Date.now()})
+    @Prop()
     createdAt: Date;
 
     @Prop()
