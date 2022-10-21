@@ -13,7 +13,9 @@ export class UserRepository {
     async createUser(user: UserCreateDto) {
         try {
             const newUser = await new this.userModel({
-                ...user
+                ...user,
+                createdAt: new Date().getTime(),
+                updatedAt: new Date().getTime()
             }).save();
             return newUser;
         } catch (error) {

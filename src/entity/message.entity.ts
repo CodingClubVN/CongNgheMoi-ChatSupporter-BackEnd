@@ -12,7 +12,7 @@ export class Message extends Document {
 
    
     @Prop()
-    createdAt: Date;
+    createdAt: Number;
 
     @Prop()
     type: string;

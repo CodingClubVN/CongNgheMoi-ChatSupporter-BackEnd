@@ -28,13 +28,13 @@ export class User extends Document {
     about: string;
 
     @Prop()
-    yearOrBirth: Date;
+    yearOrBirth: number;
 
-    @Prop({default: Date.now()})
-    updatedAt: Date;
+    @Prop()
+    updatedAt: number;
 
-    @Prop({default: Date.now()})
-    createdAt: Date;
+    @Prop()
+    createdAt: number;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

@@ -24,8 +24,8 @@ export class ConversationResponseDto {
     readStatus: Object[];
 
     @ApiProperty()
-    createdAt: Date;
+    createdAt: number;
 
     @ApiProperty()
-    updatedAt: Date;
+    updatedAt: number;
 }

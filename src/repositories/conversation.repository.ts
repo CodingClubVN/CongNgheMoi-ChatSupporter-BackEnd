@@ -30,7 +30,7 @@ export class ConversationRepository {
                 {
                     conversationName: conversation.conversationName,
                     users: users,
-                    createdAt: new Date()
+                    createdAt: new Date().getTime()
                 }
             ).save();
             return newConversation;
@@ -55,7 +55,7 @@ export class ConversationRepository {
             await this.conversationModel.updateOne(
                 {_id: conversationId},
                 {
-                    $set: ({users: users, updatedAt: new Date()})
+                    $set: ({users: users, updatedAt: new Date().getTime()})
                 }
             );
         }catch(error) {
@@ -106,7 +106,7 @@ export class ConversationRepository {
         await this.conversationModel.updateOne(
             {_id: conversationId},
             {
-                $set: ({lastMessage: lastMessage, readStatus: [], updatedAt: new Date()})
+                $set: ({lastMessage: lastMessage, readStatus: [], updatedAt: new Date().getTime()})
             }
         );
     }

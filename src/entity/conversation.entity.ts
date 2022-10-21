@@ -20,10 +20,10 @@ export class Conversation extends Document {
     readStatus: Object[];
 
     @Prop()
-    createdAt: Date;
+    createdAt: number;
 
     @Prop()
-    updatedAt: Date;
+    updatedAt: number;
 }
 
 export const ConversationSchema = SchemaFactory.createForClass(Conversation);
