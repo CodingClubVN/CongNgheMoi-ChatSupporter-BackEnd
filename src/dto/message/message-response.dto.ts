@@ -1,5 +1,18 @@
 import { ApiProperty } from "@nestjs/swagger";
 
+export class AccountMessage {
+    @ApiProperty()
+    username: string;
+}
+export class UserMessage {
+    @ApiProperty()
+    _id: string;
+    @ApiProperty()
+    avatarUrl: string;
+    @ApiProperty()
+    account: AccountMessage;
+}
+
 export class MessageResponseDto {
    
     @ApiProperty()
@@ -22,4 +35,7 @@ export class MessageResponseDto {
 
     @ApiProperty()
     type: string;
+
+    @ApiProperty()
+    user?: UserMessage
 }
