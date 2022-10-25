@@ -37,5 +37,5 @@ export class MessageResponseDto {
     type: string;
 
     @ApiProperty()
-    user?: UserMessage
+    user?: UserMessage;
 }

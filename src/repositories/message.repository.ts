@@ -17,7 +17,7 @@ export class MessageRepository {
         const page = filters.page ? filters.page : 1;
         const perpage = filters.perPage ? filters.perPage : 30;
         const skip = (page - 1)*perpage;
-        var id = mongoose.Types.ObjectId(conversationId);
+        const id = mongoose.Types.ObjectId(conversationId);
 
         const messages = await this.messageModel.aggregate([
             {

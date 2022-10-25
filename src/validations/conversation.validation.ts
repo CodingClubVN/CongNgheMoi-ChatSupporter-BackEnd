@@ -21,4 +21,14 @@ export class ConversationValidation {
         }
         return '';
     }
+
+    async checkUserFromConversationByUserId(conversationId: string, userId: string) {
+        const result = await this.conversationRepository.checkUserFromConversationByUserId(conversationId, userId);
+
+        if(result) {
+            return 'user exists in conversation!'
+        }
+        
+        return '';
+    }
 }

@@ -5,9 +5,9 @@ export class UserModel {
     @ApiProperty()
     userId: string;
 
-    @ApiProperty()
-    username: string;
+    // @ApiProperty()
+    // username: string;
 
-    @ApiProperty()
-    avatarUrl: string;
+    // @ApiProperty()
+    // avatarUrl: string;
 }

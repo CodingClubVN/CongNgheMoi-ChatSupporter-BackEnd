@@ -1,7 +1,18 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { MessageModel } from "../../entity/models/message.model";
-import { UserModel } from "../../entity/models/user.model";
+import { AccountMessage } from "../message";
 
+export class UserConversationResponse {
+
+    @ApiProperty()
+    _id?: string;
+
+    @ApiProperty()
+    account?: AccountMessage;
+
+    @ApiProperty()
+    avatarUrl?: string;
+}
 export class ConversationResponseDto {
    
     @ApiProperty()
@@ -11,10 +22,10 @@ export class ConversationResponseDto {
     conversationName: string;
 
     @ApiProperty({
-        type: UserModel,
+        type: UserConversationResponse,
         isArray: true
     })
-    users: UserModel[];
+    users: UserConversationResponse[];
     
 
     @ApiProperty()

@@ -33,7 +33,7 @@ export class EventSocketGateway {
 		console.log(client.handshake.query.userId + "leave" + data);
 	}
 
-	public emitUpdateConversation(conversationResponse: ConversationResponseDto,listRoom: string[]) {
+	public emitUpdateConversation(conversationResponse: any,listRoom: string[]) {
 		this.server.in(listRoom).emit('update-conversation', {conversation: conversationResponse});
 	}
 }

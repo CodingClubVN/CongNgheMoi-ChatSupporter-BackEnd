@@ -72,6 +72,12 @@ export class ConversationController {
     async addUserToConversation(@Res() res: Response, @Body() reqBody: ConversationAddUserDto, @Param('conversationId') conversationId) {
         try {
             const arrayUserId = reqBody.arrayUserId;
+            for (let userId of arrayUserId) {
+                const messageValidation = await this.conversationValidation.checkUserFromConversationByUserId(conversationId, userId);
+                if (messageValidation.toString().length) {
+                    return res.status(400).json(new BadRequestErrorDto([messageValidation]));
+                }
+            }
             await this.conversationService.addUserToConversation(arrayUserId, conversationId);
             return res.status(HttpStatus.OK).json(new Successful("add user to conversation successful!"))
         } catch (error) {
