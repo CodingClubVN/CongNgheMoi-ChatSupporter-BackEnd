@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { ConversationCreateDto, FilterParamDto } from "../../dto";
+import { ConversationCreateDto, ConversationUpdateDto, FilterParamDto } from "../../dto";
 import { ConversationRepository } from '../../repositories';
 
 
@@ -24,7 +24,11 @@ export class ConversationService {
     async findAllByUser(filters: FilterParamDto, userId: string) {
         return await this.conversationRepository.getAll(filters, userId);
     }
-    
+
+    async updateConversation(conversationId: string, conversation: ConversationUpdateDto) {
+        return await this.conversationRepository.updateConversation(conversationId, conversation);
+    }
+
     async updateReadStatus(userId: string, conversationId: string) {
         await this.conversationRepository.updateReadStatus(userId, conversationId);
     }

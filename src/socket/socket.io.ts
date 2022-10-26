@@ -23,17 +23,25 @@ export class EventSocketGateway {
 
 	@SubscribeMessage('join-room')
 	public handleJoinRoom(client: Socket, data: string) {
+		const roomUser = client.handshake.query.userId;
+		for (let room of client.rooms.values()) {
+			if (!room.includes(roomUser.toString()) && !room.includes(data) && !room.includes(client.id)) {
+				client.leave(room);
+			}
+		}
 		client.join(data);
-		console.log(client.handshake.query.userId + "join" + data);
+		console.log("rooms of user "+roomUser,client.rooms);
+		console.log(client.handshake.query.userId + " join " + data);
+
 	}
 
 	@SubscribeMessage('leave-room')
 	public handleLeaveRoom(client: Socket, data: string) {
 		client.leave(data);
-		console.log(client.handshake.query.userId + "leave" + data);
+		console.log(client.handshake.query.userId + " leave " + data);
 	}
 
-	public emitUpdateConversation(conversationResponse: ConversationResponseDto,listRoom: string[]) {
+	public emitUpdateConversation(conversationResponse: any,listRoom: string[]) {
 		this.server.in(listRoom).emit('update-conversation', {conversation: conversationResponse});
 	}
 }
