@@ -10,20 +10,13 @@ export class MessageService {
 
     async createMessage(message: MessageCreateDto) {
         const newMessage = await this.messageRepository.createMessage(message);
-        const data: MessageResponseDto = {
-            _id: newMessage._id,
-            content: newMessage.content,
-            conversationId: newMessage.conversationId,
-            createdAt: newMessage.createdAt,
-            description: newMessage.description,
-            fromUserId: newMessage.fromUserId,
-            type: newMessage.type
-        }
+        const data: MessageResponseDto = await this.messageRepository.findById(newMessage._id.toString());
         let listRoom = [];
         listRoom.push(newMessage.conversationId.toString());
         this.socket.emitMessage(data, listRoom);
         delete data._id;
         delete data.description;
+        delete data.user;
         await this.conversationRepository.updateLastMessageAndClearReadStatusConversation(data, message.conversationId);
         await this.emitUpdateConversation(message.conversationId.toString());
         return newMessage;

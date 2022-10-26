@@ -1,4 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
+import { UserMessage } from "../../dto";
 
 export class MessageModel {
 
@@ -16,4 +17,7 @@ export class MessageModel {
 
     @ApiProperty()
     fromUserId: string;
+
+    // @ApiProperty()
+    // user?: UserMessage;
 }

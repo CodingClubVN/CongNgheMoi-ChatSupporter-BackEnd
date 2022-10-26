@@ -54,4 +54,35 @@ export class MessageRepository {
         ])
         return messages;
     }
+
+    async findById(messageId: string) {
+        const id = mongoose.Types.ObjectId(messageId);
+        const messages = await this.messageModel.aggregate([
+            {
+                $match: {_id: id}
+            },
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: "fromUserId",
+                    foreignField: "_id",
+                    as: "user"
+                }
+            },
+            {$unwind: '$user'},
+            {
+                $project: {
+                    "__v": 0,
+                    "user.account.password": 0,
+                    "user.__v": 0,
+                    "user.fullname": 0,
+                    "user.email": 0,
+                    "user.phone": 0,
+                    "user.createdAt": 0,
+                    "user.updatedAt": 0,
+                }
+            }
+        ])
+        return messages[0];
+    }
 }
