@@ -37,7 +37,7 @@ export class MessageService {
         let listRoom= [];
         const conversation = await this.conversationRepository.getConversationById(conversationId);
         for (let user of conversation.users) {
-            listRoom.push(user.userId.toString());
+            listRoom.push(user._id.toString());
         }
         this.socket.emitUpdateConversation(conversation, listRoom);
     }
