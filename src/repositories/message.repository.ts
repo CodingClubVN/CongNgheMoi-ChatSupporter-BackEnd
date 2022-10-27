@@ -45,11 +45,12 @@ export class MessageRepository {
                 }
             },
             {
+                $sort: {createdAt: -1}
+            },
+            {
                 $skip: skip
             }, {
                 $limit: perpage
-            }, {
-                $sort: {createdAt: -1}
             }
         ])
         return messages;
