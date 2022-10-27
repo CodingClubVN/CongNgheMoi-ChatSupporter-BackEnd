@@ -1,7 +1,9 @@
-import { Controller, Get, HttpStatus,Query, Req, Res, UseGuards } from "@nestjs/common";
-import { ApiBearerAuth, ApiOkResponse, ApiResponse, ApiTags } from "@nestjs/swagger";
+import { Body, Controller, Get, HttpStatus, Param, Put, Query, Req, Res, UploadedFile, UseGuards, UseInterceptors } from "@nestjs/common";
+import { FileInterceptor } from "@nestjs/platform-express";
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOkResponse, ApiOperation, ApiParam, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { Request, Response } from "express";
-import { FilterParamDto, InternalServerErrorDTO, ListUserResponse, UserResponseDto } from "../../dto";
+import { FirebaseUploadUtil } from "../../utils/firebase-upload.util";
+import { FilterParamDto, InternalServerErrorDTO,ResourceNotFoundException, ListUserResponse, UserResponseDto, UserUpdateDto, UserUpdateDtoResponse } from "../../dto";
 import { JwtAuthGuard } from "../auth/auth.guard";
 import { UserService } from "./user.service";
 
@@ -9,17 +11,17 @@ import { UserService } from "./user.service";
 @ApiTags('api/users')
 @Controller('api/users')
 export class UserController {
-    constructor(private userService: UserService){}
+    constructor(private userService: UserService, private firebase: FirebaseUploadUtil) { }
 
     @ApiOkResponse({
         status: 200,
-        type:  UserResponseDto,
+        type: UserResponseDto,
         isArray: false
     })
     @ApiResponse({
         status: 500,
         description: 'error',
-        type:  InternalServerErrorDTO,
+        type: InternalServerErrorDTO,
         isArray: false
     })
     @Get('/me')
@@ -29,21 +31,21 @@ export class UserController {
             const userId = req.user['userId'];
             const user = await this.userService.findById(userId);
             return res.status(HttpStatus.OK).json(user);
-        }catch(error) {
+        } catch (error) {
             console.log(error);
             return res.status(500).json(new InternalServerErrorDTO());
         }
     }
 
-    
+
     @ApiOkResponse({
         status: 200,
-        type:  ListUserResponse,
+        type: ListUserResponse,
     })
     @ApiResponse({
         status: 500,
         description: 'error',
-        type:  InternalServerErrorDTO,
+        type: InternalServerErrorDTO,
         isArray: false
     })
     @Get('')
@@ -52,7 +54,78 @@ export class UserController {
         try {
             const users = await this.userService.findAll(filters);
             return res.status(200).json(users);
-        }catch(error) {
+        } catch (error) {
+            console.log(error);
+            return res.status(500).json(new InternalServerErrorDTO());
+        }
+    }
+
+    @ApiOkResponse({
+        status: 200,
+        type: UserUpdateDtoResponse,
+    })
+    @ApiResponse({
+        status: 500,
+        description: 'error',
+        type: InternalServerErrorDTO,
+    })
+    @ApiResponse({
+        status: 404,
+        description: 'not found',
+        type: InternalServerErrorDTO,
+    })
+    @ApiOperation({ summary: 'update user profile' })
+    @ApiParam({ name: 'userId', required: true })
+    @ApiConsumes('multipart/form-data')
+    @ApiBody({
+        schema: {
+            type: 'object',
+            properties: {
+                fullname: {
+                    type: 'string',
+                    format: 'string',
+                },
+                avatar: {
+                    type: 'string',
+                    format: 'binary',
+                    nullable: false
+                },
+                phone: {
+                    type: 'string',
+                    format: 'string',
+                },
+                about: {
+                    type: 'string',
+                    format: 'string',
+                },
+                yearOrBirth: {
+                    type: 'number',
+                    format: 'int32',
+                }
+            }
+        }
+    })
+    @UseInterceptors(FileInterceptor('avatar'))
+    @Put(':userId')
+    @UseGuards(JwtAuthGuard)
+    async updateUserProfile(@Res() res: Response, @Param('userId') userId: string, @Body() body , @UploadedFile() file: Express.Multer.File) {
+
+        try {
+            if (!file) {
+                return res.status(404).json(new ResourceNotFoundException("file is required"));
+            }
+            await this.firebase.uploadFile(file);
+            const url = this.firebase.getUrlUpload(file.originalname);
+            let user: UserUpdateDto={
+                fullname: body.fullname,
+                avatarUrl: url,
+                phone: body.phone,
+                about: body.about,
+                yearOrBirth: body.yearOrBirth
+            }
+            const userUpdate = await this.userService.updateUserProfile(userId, user);
+            return res.status(200).json(userUpdate);
+        } catch (error) {
             console.log(error);
             return res.status(500).json(new InternalServerErrorDTO());
         }
