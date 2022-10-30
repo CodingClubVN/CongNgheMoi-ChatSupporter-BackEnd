@@ -1,7 +1,7 @@
 import { HttpException } from "@nestjs/common";
 import { ApiProperty } from "@nestjs/swagger";
 
-export default class ResourceNotFoundException extends HttpException {
+export class ResourceNotFoundException{
     @ApiProperty({
         default: 404
     })
@@ -21,6 +21,6 @@ export default class ResourceNotFoundException extends HttpException {
             error: "Not found!",
             message: message
         }
-        super(partial, 404);
+        Object.assign(this, partial);
     }
 }
