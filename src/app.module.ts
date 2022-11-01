@@ -6,6 +6,7 @@ import { join } from 'path';
 import configuration from './config/configuration';
 import { AuthModule } from './modules/auth/auth.module';
 import { ConversationModule } from './modules/conversation/conversation.module';
+import { FriendModule } from './modules/friend/friend.module';
 import { MessageModule } from './modules/message/message.module';
 import { UserModule } from './modules/user/user.module';
 import { EventSocketGateway } from './socket/socket.io';
@@ -31,7 +32,8 @@ import { EventSocketGateway } from './socket/socket.io';
      AuthModule,
      UserModule,
      ConversationModule,
-     MessageModule
+     MessageModule,
+     FriendModule
   ],
   controllers: [],
   providers: [EventSocketGateway],

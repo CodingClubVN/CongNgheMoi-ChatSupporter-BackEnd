@@ -18,7 +18,7 @@ export class Message extends Document {
     type: string;
 
     @Prop()
-    content: string;
+    content: string[];
 
     @Prop({default: null})
     description: string;
@@ -27,6 +27,9 @@ export class Message extends Document {
         type: MongooseSchema.Types.ObjectId,
     })
     fromUserId: string;
+
+    @Prop({default: 'normal'})
+    status: string;
 }
 
 export const MessageSchema = SchemaFactory.createForClass(Message);

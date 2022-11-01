@@ -1,9 +1,9 @@
-import { Body, Controller, Get, HttpStatus,Param,Post,Query, Req, Res, StreamableFile, UploadedFile, UseGuards, UseInterceptors } from "@nestjs/common";
-import { FileInterceptor } from "@nestjs/platform-express";
+import { Body, Controller, Get, HttpStatus,Param,Post,Put,Query, Req, Res, StreamableFile, UploadedFile, UploadedFiles, UseGuards, UseInterceptors } from "@nestjs/common";
+import { FileInterceptor, FilesInterceptor } from "@nestjs/platform-express";
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOkResponse, ApiParam, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { Request, Response } from "express";
 import { FirebaseUploadUtil } from "../../utils/firebase-upload.util";
-import { DownloadFileRequestDto, FilterParamDto, InternalServerErrorDTO, MessageCreateDto, MessageCreateResponseDto, MessageResponseDto } from "../../dto";
+import { DownloadFileRequestDto, FilterParamDto, InternalServerErrorDTO, MessageCreateDto, MessageCreateResponseDto, MessageResponseDto, MessageTranferDto, Successful } from "../../dto";
 import { JwtAuthGuard } from "../auth/auth.guard";
 import { MessageService } from "./message.service";
 import { createReadStream, existsSync, mkdirSync, readdir, unlink } from 'fs';
@@ -31,42 +31,48 @@ export class MessageController {
     schema: {
         type: 'object',
         properties: {
-            file: {
-                type: 'string',
-                format: 'binary',
+                files: {
+                    type: 'array',
+                    items: {
+                        type: 'string',
+                        format: 'binary',
+                    },
+                },
+                type: {
+                    type: 'string',
+                    format: 'string'
+                },
+                content: {
+                    type: 'string',
+                    format: 'string'
+                },
+                description: {
+                    type: 'string',
+                    format: 'string'
+                }
             },
-            type: {
-                type: 'string',
-                format: 'string'
-            },
-            content: {
-                type: 'string',
-                format: 'string'
-            },
-            description: {
-                type: 'string',
-                format: 'string'
-            }
         },
-    },
     })
     @ApiParam({name: 'conversationId', required: true})
     @UseGuards(JwtAuthGuard)
-    @UseInterceptors(FileInterceptor('file'))
-    async createMessage(@Req() req, @Res() res: Response, @Param('conversationId') conversationId: string, @Body() body, @UploadedFile() file?: Express.Multer.File) {
+    @UseInterceptors(FilesInterceptor('files'))
+    async createMessage(@Req() req, @Res() res: Response, @Param('conversationId') conversationId: string, @Body() body, @UploadedFiles() files?: Array<Express.Multer.File>) {
         try {
             let message: MessageCreateDto = {
                 fromUserId: req.user['userId'],
                 conversationId,
-                type: body.type
+                type: body.type,
+                content: []
             }
-            if(file) {
-                await this.firebase.uploadFile(file);
-                const url = this.firebase.getUrlUpload(file.originalname);
-                message.content = url;
-                message.description = body.description;
+            if (files) {
+                for (let file of files) {
+                    await this.firebase.uploadFile(file);
+                    const url = this.firebase.getUrlUpload(file.originalname);
+                    message.content.push(url);
+                    message.description = body.description;
+               }
             }else {
-                message.content = body.content;
+                message.content.push(body.content);
             }
             const newMessage = await this.messageService.createMessage(message);
             return res.status(200).json(new MessageCreateResponseDto({messageId: newMessage._id}));
@@ -138,6 +144,53 @@ export class MessageController {
                 'Content-Disposition': `attachment; filename=${filename}`,
             });
             return new StreamableFile(file);
+        }catch(error) {
+            console.log(error);
+            return res.status(500).json(new InternalServerErrorDTO());
+        }
+    }
+
+    @Put(":id/recover")
+    @ApiOkResponse({
+        status: 200,
+        type:  Successful,
+    })
+    @ApiResponse({
+        status: 500,
+        description: 'error',
+        type:  InternalServerErrorDTO,
+        isArray: false
+    })
+    @ApiParam({name: 'id', required: true})
+    @UseGuards(JwtAuthGuard)
+    async recoverMessage(@Req() req, @Res() res: Response, @Param('id') messageId: string) {
+        try {
+            await this.messageService.recoverMessage(messageId);
+            return res.status(200).json(new Successful("OK"));
+        }catch(error) {
+            console.log(error);
+            return res.status(500).json(new InternalServerErrorDTO());
+        }
+    }
+
+    @Post('/tranfer/conversation/:conversationId')
+    @ApiOkResponse({
+        status: 200,
+        type:  Successful,
+    })
+    @ApiResponse({
+        status: 500,
+        description: 'error',
+        type:  InternalServerErrorDTO,
+        isArray: false
+    })
+    @ApiParam({name: 'conversationId', required: true})
+    @UseGuards(JwtAuthGuard)
+    async tranferMessage(@Req() req, @Res() res: Response, @Param('conversationId') conversationId: string, @Body() body: MessageTranferDto) {
+        try {
+            const userId = req.user['userId'];
+            await this.messageService.tranferMessage(body.messageId, userId, conversationId);
+            return res.status(200).json(new Successful("OK"));
         }catch(error) {
             console.log(error);
             return res.status(500).json(new InternalServerErrorDTO());

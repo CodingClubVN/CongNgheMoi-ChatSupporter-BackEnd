@@ -3,7 +3,7 @@ export class MessageCreateDto {
 
     conversationId: string;
 
-    content?: string;
+    content?: string[];
 
     description?: string;
 
@@ -12,4 +12,6 @@ export class MessageCreateDto {
     fromUserId: string;
 
     createdAt?: number;
+
+    status?: string;
 }
