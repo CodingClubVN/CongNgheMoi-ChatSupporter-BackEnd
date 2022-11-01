@@ -3,7 +3,7 @@ import { FileInterceptor, FilesInterceptor } from "@nestjs/platform-express";
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOkResponse, ApiParam, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { Request, Response } from "express";
 import { FirebaseUploadUtil } from "../../utils/firebase-upload.util";
-import { DownloadFileRequestDto, FilterParamDto, InternalServerErrorDTO, MessageCreateDto, MessageCreateResponseDto, MessageResponseDto, Successful } from "../../dto";
+import { DownloadFileRequestDto, FilterParamDto, InternalServerErrorDTO, MessageCreateDto, MessageCreateResponseDto, MessageResponseDto, MessageTranferDto, Successful } from "../../dto";
 import { JwtAuthGuard } from "../auth/auth.guard";
 import { MessageService } from "./message.service";
 import { createReadStream, existsSync, mkdirSync, readdir, unlink } from 'fs';
@@ -166,6 +166,30 @@ export class MessageController {
     async recoverMessage(@Req() req, @Res() res: Response, @Param('id') messageId: string) {
         try {
             await this.messageService.recoverMessage(messageId);
+            return res.status(200).json(new Successful("OK"));
+        }catch(error) {
+            console.log(error);
+            return res.status(500).json(new InternalServerErrorDTO());
+        }
+    }
+
+    @Post('/tranfer/conversation/:conversationId')
+    @ApiOkResponse({
+        status: 200,
+        type:  Successful,
+    })
+    @ApiResponse({
+        status: 500,
+        description: 'error',
+        type:  InternalServerErrorDTO,
+        isArray: false
+    })
+    @ApiParam({name: 'conversationId', required: true})
+    @UseGuards(JwtAuthGuard)
+    async tranferMessage(@Req() req, @Res() res: Response, @Param('conversationId') conversationId: string, @Body() body: MessageTranferDto) {
+        try {
+            const userId = req.user['userId'];
+            await this.messageService.tranferMessage(body.messageId, userId, conversationId);
             return res.status(200).json(new Successful("OK"));
         }catch(error) {
             console.log(error);

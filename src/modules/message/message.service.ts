@@ -38,4 +38,23 @@ export class MessageService {
     async recoverMessage(messageId: string) {
         await this.messageRepository.recoverMessage(messageId);
     }
+
+    async tranferMessage(messageId: string, userId: string, conversationId: string) {
+        const message = await this.messageRepository.findById(messageId);
+        const data = {
+            conversationId,
+
+            content: message.content,
+
+            description: message.description,
+
+            type: message.type,
+
+            fromUserId: userId,
+
+            status: 'tranfer'
+        };
+
+        await this.createMessage(data);
+    }
 }

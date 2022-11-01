@@ -12,4 +12,6 @@ export class MessageCreateDto {
     fromUserId: string;
 
     createdAt?: number;
+
+    status?: string;
 }
