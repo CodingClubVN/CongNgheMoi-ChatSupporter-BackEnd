@@ -1,9 +1,9 @@
-import { Body, Controller, Get, HttpStatus,Param,Post,Query, Req, Res, StreamableFile, UploadedFile, UploadedFiles, UseGuards, UseInterceptors } from "@nestjs/common";
+import { Body, Controller, Get, HttpStatus,Param,Post,Put,Query, Req, Res, StreamableFile, UploadedFile, UploadedFiles, UseGuards, UseInterceptors } from "@nestjs/common";
 import { FileInterceptor, FilesInterceptor } from "@nestjs/platform-express";
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOkResponse, ApiParam, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { Request, Response } from "express";
 import { FirebaseUploadUtil } from "../../utils/firebase-upload.util";
-import { DownloadFileRequestDto, FilterParamDto, InternalServerErrorDTO, MessageCreateDto, MessageCreateResponseDto, MessageResponseDto } from "../../dto";
+import { DownloadFileRequestDto, FilterParamDto, InternalServerErrorDTO, MessageCreateDto, MessageCreateResponseDto, MessageResponseDto, Successful } from "../../dto";
 import { JwtAuthGuard } from "../auth/auth.guard";
 import { MessageService } from "./message.service";
 import { createReadStream, existsSync, mkdirSync, readdir, unlink } from 'fs';
@@ -144,6 +144,29 @@ export class MessageController {
                 'Content-Disposition': `attachment; filename=${filename}`,
             });
             return new StreamableFile(file);
+        }catch(error) {
+            console.log(error);
+            return res.status(500).json(new InternalServerErrorDTO());
+        }
+    }
+
+    @Put(":id/recover")
+    @ApiOkResponse({
+        status: 200,
+        type:  Successful,
+    })
+    @ApiResponse({
+        status: 500,
+        description: 'error',
+        type:  InternalServerErrorDTO,
+        isArray: false
+    })
+    @ApiParam({name: 'id', required: true})
+    @UseGuards(JwtAuthGuard)
+    async recoverMessage(@Req() req, @Res() res: Response, @Param('id') messageId: string) {
+        try {
+            await this.messageService.recoverMessage(messageId);
+            return res.status(200).json(new Successful("OK"));
         }catch(error) {
             console.log(error);
             return res.status(500).json(new InternalServerErrorDTO());

@@ -35,4 +35,7 @@ export class MessageService {
         this.socket.emitUpdateConversation(conversation, listRoom);
     }
     
+    async recoverMessage(messageId: string) {
+        await this.messageRepository.recoverMessage(messageId);
+    }
 }

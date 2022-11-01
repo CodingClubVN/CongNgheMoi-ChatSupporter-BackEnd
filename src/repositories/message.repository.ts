@@ -86,4 +86,13 @@ export class MessageRepository {
         ])
         return messages[0];
     }
+
+    async recoverMessage(messageId: string) {
+        await this.messageModel.updateOne(
+            {_id: messageId}, 
+            {
+                $set: ({status: 'recovered'})
+            }
+        );
+    }
 }

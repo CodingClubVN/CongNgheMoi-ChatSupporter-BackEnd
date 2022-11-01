@@ -79,5 +79,4 @@ export class FriendRepository {
         return list;
     }
     
-
 }
