@@ -1,5 +1,5 @@
-import { Body, Controller, Get, HttpStatus,Param,Post,Query, Req, Res, StreamableFile, UploadedFile, UseGuards, UseInterceptors } from "@nestjs/common";
-import { FileInterceptor } from "@nestjs/platform-express";
+import { Body, Controller, Get, HttpStatus,Param,Post,Query, Req, Res, StreamableFile, UploadedFile, UploadedFiles, UseGuards, UseInterceptors } from "@nestjs/common";
+import { FileInterceptor, FilesInterceptor } from "@nestjs/platform-express";
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOkResponse, ApiParam, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { Request, Response } from "express";
 import { FirebaseUploadUtil } from "../../utils/firebase-upload.util";
@@ -31,42 +31,48 @@ export class MessageController {
     schema: {
         type: 'object',
         properties: {
-            file: {
-                type: 'string',
-                format: 'binary',
+                files: {
+                    type: 'array',
+                    items: {
+                        type: 'string',
+                        format: 'binary',
+                    },
+                },
+                type: {
+                    type: 'string',
+                    format: 'string'
+                },
+                content: {
+                    type: 'string',
+                    format: 'string'
+                },
+                description: {
+                    type: 'string',
+                    format: 'string'
+                }
             },
-            type: {
-                type: 'string',
-                format: 'string'
-            },
-            content: {
-                type: 'string',
-                format: 'string'
-            },
-            description: {
-                type: 'string',
-                format: 'string'
-            }
         },
-    },
     })
     @ApiParam({name: 'conversationId', required: true})
     @UseGuards(JwtAuthGuard)
-    @UseInterceptors(FileInterceptor('file'))
-    async createMessage(@Req() req, @Res() res: Response, @Param('conversationId') conversationId: string, @Body() body, @UploadedFile() file?: Express.Multer.File) {
+    @UseInterceptors(FilesInterceptor('files'))
+    async createMessage(@Req() req, @Res() res: Response, @Param('conversationId') conversationId: string, @Body() body, @UploadedFiles() files?: Array<Express.Multer.File>) {
         try {
             let message: MessageCreateDto = {
                 fromUserId: req.user['userId'],
                 conversationId,
-                type: body.type
+                type: body.type,
+                content: []
             }
-            if(file) {
-                await this.firebase.uploadFile(file);
-                const url = this.firebase.getUrlUpload(file.originalname);
-                message.content = url;
-                message.description = body.description;
+            if (files) {
+                for (let file of files) {
+                    await this.firebase.uploadFile(file);
+                    const url = this.firebase.getUrlUpload(file.originalname);
+                    message.content.push(url);
+                    message.description = body.description;
+               }
             }else {
-                message.content = body.content;
+                message.content.push(body.content);
             }
             const newMessage = await this.messageService.createMessage(message);
             return res.status(200).json(new MessageCreateResponseDto({messageId: newMessage._id}));

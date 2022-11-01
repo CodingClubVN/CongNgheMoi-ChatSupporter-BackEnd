@@ -3,7 +3,7 @@ export class MessageCreateDto {
 
     conversationId: string;
 
-    content?: string;
+    content?: string[];
 
     description?: string;
 

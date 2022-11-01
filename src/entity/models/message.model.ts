@@ -10,7 +10,7 @@ export class MessageModel {
     createdAt: Number;
 
     @ApiProperty()
-    content: string;
+    content: [string];
 
     @ApiProperty()
     type: string;

@@ -25,7 +25,7 @@ export class MessageResponseDto {
     fromUserId: string;
 
     @ApiProperty()
-    content: string;
+    content: [string];
 
     @ApiProperty()
     description: string;
@@ -38,4 +38,7 @@ export class MessageResponseDto {
 
     @ApiProperty()
     user?: UserMessage;
+
+    @ApiProperty()
+    status?: string;
 }
