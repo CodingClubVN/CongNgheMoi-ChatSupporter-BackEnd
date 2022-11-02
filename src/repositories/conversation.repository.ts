@@ -1,7 +1,7 @@
 import { InternalServerErrorException } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
-import { ConversationCreateDto, FilterParamDto, ListConversationResponseDto,ConversationUpdateDto, MessageResponseDto } from "../dto";
+import { ConversationCreateDto, FilterParamDto, ListConversationResponseDto, ConversationUpdateDto, MessageResponseDto } from "../dto";
 import { MessageModel } from "src/entity/models/message.model";
 import { User, Conversation } from "../entity";
 const mongoose = require('mongoose');
@@ -11,15 +11,15 @@ export class ConversationRepository {
     constructor(
         @InjectModel(Conversation.name) private readonly conversationModel: Model<Conversation>,
         @InjectModel(User.name) private readonly userModel: Model<User>
-    ){
+    ) {
 
     }
 
     async createConversation(conversation: ConversationCreateDto) {
         try {
             let users = [];
-            for (let userId of conversation.arrayUserId){
-                const user =await this.userModel.findById(userId);
+            for (let userId of conversation.arrayUserId) {
+                const user = await this.userModel.findById(userId);
                 users.push({
                     userId: user._id
                 });
@@ -29,11 +29,11 @@ export class ConversationRepository {
                     conversationName: conversation.conversationName,
                     users: users,
                     createdAt: new Date().getTime(),
-                    updatedAt:  new Date().getTime()
+                    updatedAt: new Date().getTime()
                 }
             ).save();
             return newConversation;
-        }catch(error) {
+        } catch (error) {
             throw new InternalServerErrorException(error);
         }
     }
@@ -41,21 +41,21 @@ export class ConversationRepository {
     async addUsersToGroup(litsUserId: string[], conversationId: string) {
         try {
             const conversation = await this.conversationModel.findById(conversationId);
-            
+
             let users = conversation.users;
-            for (let userId of litsUserId){
-                const user =await this.userModel.findById(userId);
+            for (let userId of litsUserId) {
+                const user = await this.userModel.findById(userId);
                 users.push({
                     userId: user._id
                 });
             }
             await this.conversationModel.updateOne(
-                {_id: conversationId},
+                { _id: conversationId },
                 {
-                    $set: ({users: users, updatedAt: new Date().getTime()})
+                    $set: ({ users: users, updatedAt: new Date().getTime() })
                 }
             );
-        }catch(error) {
+        } catch (error) {
             throw new InternalServerErrorException(error);
         }
     }
@@ -65,10 +65,10 @@ export class ConversationRepository {
             const id = mongoose.Types.ObjectId(conversationId);
             const conversations = await this.conversationModel.aggregate([
                 {
-                    $match: {_id: id}
+                    $match: { _id: id }
                 },
                 {
-                    $sort: {updatedAt: -1}
+                    $sort: { updatedAt: -1 }
                 },
                 { $unwind: "$users" },
                 {
@@ -78,17 +78,19 @@ export class ConversationRepository {
                         foreignField: "_id",
                         as: "user"
                     }
-                }, 
+                },
                 { $unwind: "$user" },
-                { $group: {
-                    _id: "$_id",
-                    conversationName: { $last: "$conversationName" },
-                    lastMessage: { $last: "$lastMessage" },
-                    readStatus: { $last: "$readStatus" },
-                    createdAt: { $last: "$createdAt" },
-                    updatedAt: { $last: "$updatedAt" },
-                    users: { "$push": "$user" },
-                }},
+                {
+                    $group: {
+                        _id: "$_id",
+                        conversationName: { $last: "$conversationName" },
+                        lastMessage: { $last: "$lastMessage" },
+                        readStatus: { $last: "$readStatus" },
+                        createdAt: { $last: "$createdAt" },
+                        updatedAt: { $last: "$updatedAt" },
+                        users: { "$push": "$user" },
+                    }
+                },
                 {
                     $project: {
                         __v: 0,
@@ -103,16 +105,16 @@ export class ConversationRepository {
                 }
             ]);
             return conversations[0];
-        } catch(error) {
+        } catch (error) {
             throw new InternalServerErrorException(error);
         }
     }
 
     async getConversationByName(conversationName: string) {
         try {
-            const conversation = await this.conversationModel.findOne({conversationName: conversationName});
+            const conversation = await this.conversationModel.findOne({ conversationName: conversationName });
             return conversation;
-        } catch(error) {
+        } catch (error) {
             throw new InternalServerErrorException(error);
         }
     }
@@ -121,18 +123,18 @@ export class ConversationRepository {
         try {
             const page = filters.page ? filters.page : 1;
             const perpage = filters.perPage ? filters.perPage : 10;
-            const skip = (page - 1)*perpage;
+            const skip = (page - 1) * perpage;
             const id = mongoose.Types.ObjectId(userId);
             const options = filters.search ? {
-                conversationName: {$regex: filters.search },
+                conversationName: { $regex: filters.search },
                 "users.userId": id
-            } : {"users.userId": id};
+            } : { "users.userId": id };
             const conversations = await this.conversationModel.aggregate([
                 {
                     $match: options
                 },
                 {
-                    $sort: {updatedAt: -1}
+                    $sort: { updatedAt: -1 }
                 },
                 { $unwind: "$users" },
                 {
@@ -142,17 +144,19 @@ export class ConversationRepository {
                         foreignField: "_id",
                         as: "user"
                     }
-                }, 
+                },
                 { $unwind: "$user" },
-                { $group: {
-                    _id: "$_id",
-                    conversationName: { $last: "$conversationName" },
-                    lastMessage: { $last: "$lastMessage" },
-                    readStatus: { $last: "$readStatus" },
-                    createdAt: { $last: "$createdAt" },
-                    updatedAt: { $last: "$updatedAt" },
-                    users: { "$push": "$user" },
-                }},
+                {
+                    $group: {
+                        _id: "$_id",
+                        conversationName: { $last: "$conversationName" },
+                        lastMessage: { $last: "$lastMessage" },
+                        readStatus: { $last: "$readStatus" },
+                        createdAt: { $last: "$createdAt" },
+                        updatedAt: { $last: "$updatedAt" },
+                        users: { "$push": "$user" },
+                    }
+                },
                 {
                     $project: {
                         __v: 0,
@@ -171,10 +175,10 @@ export class ConversationRepository {
                     $limit: Number(perpage)
                 }
             ]);
-            const total = await this.conversationModel.count({"users.userId": id});
-            const data = new ListConversationResponseDto({total, data: conversations});
+            const total = await this.conversationModel.count({ "users.userId": id });
+            const data = new ListConversationResponseDto({ total, data: conversations });
             return data;
-        }catch(error) {
+        } catch (error) {
             throw new InternalServerErrorException(error);
         }
     }
@@ -182,9 +186,9 @@ export class ConversationRepository {
     async updateLastMessageAndClearReadStatusConversation(message: MessageResponseDto, conversationId: string) {
         const lastMessage = message as MessageModel;
         await this.conversationModel.updateOne(
-            {_id: conversationId},
+            { _id: conversationId },
             {
-                $set: ({lastMessage: lastMessage, readStatus: [], updatedAt: new Date().getTime()})
+                $set: ({ lastMessage: lastMessage, readStatus: [], updatedAt: new Date().getTime() })
             }
         );
     }
@@ -193,10 +197,10 @@ export class ConversationRepository {
         try {
             const conversationUpdate = await this.conversationModel.findById(conversationId);
             conversationUpdate.conversationName = conversation.conversationName;
-            conversationUpdate.updatedAt=new Date().getTime();
-            await this.conversationModel.updateOne({_id: conversationId}, conversationUpdate);
+            conversationUpdate.updatedAt = new Date().getTime();
+            await this.conversationModel.updateOne({ _id: conversationId }, conversationUpdate);
             return conversationUpdate;
-        }catch(error){
+        } catch (error) {
             throw new InternalServerErrorException(error);
         }
     }
@@ -205,28 +209,47 @@ export class ConversationRepository {
         const conversation = await this.getConversationById(conversationId);
         let readStatus = conversation.readStatus;
 
-        if(!readStatus.includes(userId)){
+        if (!readStatus.includes(userId)) {
             readStatus.push(userId);
         }
 
         await this.conversationModel.updateOne(
-            {_id: conversationId},
+            { _id: conversationId },
             {
-                $set: ({readStatus: readStatus})
+                $set: ({ readStatus: readStatus })
             }
         );
     }
 
-    async checkUserFromConversationByUserId(conversationId,userId: string) {
+    async checkUserFromConversationByUserId(conversationId, userId: string) {
         const conversation = await this.conversationModel.find(
             {
-                _id: mongoose.Types.ObjectId(conversationId), 
+                _id: mongoose.Types.ObjectId(conversationId),
                 "users.userId": mongoose.Types.ObjectId(userId)
             });
-        
+
         if (conversation.length) {
             return true;
         }
         return false;
+    }
+
+    async removeUserFromConversation(conversationId: string, userId: string) {
+        try {
+            const conversation = await this.conversationModel.findById(conversationId);
+            const users = conversation.users;
+            const index = users.findIndex(user => user.userId == userId);
+            users.splice(index, 1);
+            await this.conversationModel.updateOne(
+                { _id: conversationId },
+                {
+                    $set: ({ users: users, updatedAt: new Date().getTime() })
+                }
+            );
+        } catch (error) {
+            throw new InternalServerErrorException(error);
+        }
+        
+        
     }
 }
