@@ -95,4 +95,14 @@ export class MessageRepository {
             }
         );
     }
+
+    async createNotificationMessage(content: string, conversationId: string) {
+        const message: MessageCreateDto = {
+            conversationId,
+            content: [content],
+            type: 'notification',
+        }
+        const newMessage = await this.createMessage(message);
+        return newMessage;
+    }
 }
