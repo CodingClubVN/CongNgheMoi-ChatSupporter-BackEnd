@@ -64,7 +64,9 @@ export class MessageController {
                 type: body.type,
                 content: []
             }
-            if (files) {
+            
+            if (files.length) {
+                
                 for (let file of files) {
                     await this.firebase.uploadFile(file);
                     const url = this.firebase.getUrlUpload(file.originalname);
