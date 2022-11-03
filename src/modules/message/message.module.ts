@@ -14,6 +14,6 @@ import { EventSocketGateway } from '../../socket/socket.io';
     ],
     controllers: [MessageController],
     providers: [MessageService, FirebaseUploadUtil, MessageRepository, EventSocketGateway, ConversationRepository],
-    exports: []
+    exports: [MessageService]
 })
 export class MessageModule {}

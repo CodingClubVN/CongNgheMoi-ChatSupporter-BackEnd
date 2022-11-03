@@ -9,7 +9,7 @@ export class MessageCreateDto {
 
     type?: string;
 
-    fromUserId: string;
+    fromUserId?: string;
 
     createdAt?: number;
 
