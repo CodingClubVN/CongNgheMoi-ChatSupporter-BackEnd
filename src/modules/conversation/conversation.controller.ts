@@ -1,8 +1,8 @@
-import { Controller, Get, HttpStatus, Post, Req, Res, UseGuards, Body, Param, Put, Query } from "@nestjs/common";
+import { Controller, Get, HttpStatus, Post, Req, Res, UseGuards, Body, Param, Put, Query, Patch } from "@nestjs/common";
 import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiParam, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { Request, Response } from "express";
 import { ConversationValidation } from "../../validations";
-import { BadRequestErrorDto, ConversationAddUserDto, ConversationCreateDto, ConversationCreateResponseDto, ConversationResponseDto, ConversationUpdateDto, FilterParamDto, InternalServerErrorDTO, ListConversationResponseDto, Successful } from "../../dto";
+import { BadRequestErrorDto, ConversationAddUserDto, ConversationCreateDto, ConversationCreateResponseDto, ConversationResponseDto, ConversationUpdateDto, FilterParamDto, InternalServerErrorDTO, ListConversationResponseDto, ResourceNotFoundException, Successful } from "../../dto";
 import { JwtAuthGuard } from "../auth/auth.guard";
 import { ConversationService } from "./conversation.service";
 
@@ -172,7 +172,7 @@ export class ConversationController {
     @ApiResponse({
         status: 404,
         description: 'not found',
-        type: InternalServerErrorDTO,
+        type: ResourceNotFoundException,
     })
     @ApiOperation({ summary: 'update conversation' })
     @ApiParam({ name: 'conversationId', required: true })
@@ -186,6 +186,36 @@ export class ConversationController {
             }
             const conversationUpdated = await this.conversationService.updateConversation(conversationId, conversationReq);
             return res.status(200).json(conversationUpdated);
+        } catch (error) {
+            console.log(error);
+            return res.status(500).json(new InternalServerErrorDTO());
+        }
+    }
+
+    @ApiOkResponse({
+        status: 200,
+        type: Successful,
+    })
+    @ApiResponse({
+        status: 404,
+        description: 'not found',
+        type: ResourceNotFoundException,
+    })
+    @ApiResponse({
+        status: 500,
+        description: 'error',
+        type: InternalServerErrorDTO,
+        isArray: false
+    })
+    @ApiOperation({ summary: 'remove user from conversation' })
+    @ApiParam({ name: 'conversationId', required: true })
+    @ApiParam({ name: 'userId', required: true })
+    @Put(":conversationId/:userId/remove-user")
+    @UseGuards(JwtAuthGuard)
+    async removeUserFromConversation(@Res() res: Response, @Param('conversationId') conversationId, @Param('userId') userId) {
+        try {
+            await this.conversationService.removeUserFromConversation(conversationId, userId);
+            return res.status(200).json(new Successful("remove user from conversation successful!"));
         } catch (error) {
             console.log(error);
             return res.status(500).json(new InternalServerErrorDTO());

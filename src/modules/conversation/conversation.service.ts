@@ -32,4 +32,8 @@ export class ConversationService {
     async updateReadStatus(userId: string, conversationId: string) {
         await this.conversationRepository.updateReadStatus(userId, conversationId);
     }
+
+    async removeUserFromConversation(userId: string, conversationId: string) {
+        await this.conversationRepository.removeUserFromConversation(userId, conversationId);
+    }
 }
