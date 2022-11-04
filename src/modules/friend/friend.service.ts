@@ -15,13 +15,12 @@ export class FriendService {
         private socket: EventSocketGateway,
         private userRepository: UserRepository
     ) {}
-    
     async createFriendRequest(userId: string, friendId: string) {
         const newFriendRequest = await this.friendRequestReposiory.createFriendRequest(userId, friendId);
         const data = await this.friendRequestReposiory.findById(newFriendRequest._id.toString());
         delete data.fromUserId;
         delete data.toUserId;
-        
+
         this.socket.emitSendRequestFriend(friendId, data);
 
         return newFriendRequest;
@@ -67,6 +66,11 @@ export class FriendService {
     async getAllFriend(userId: string, filters: FilterParamDto) {
         const list = await this.friendRepository.findAll(userId, filters);
         return list;
+    }
+
+    async removeFriendRequestAfterRequest(fromUserId: string, toUserId: string) {
+        await this.friendRequestReposiory.removeFriendRequestAfterRequest(fromUserId, toUserId);
+        return true;
     }
 
 }

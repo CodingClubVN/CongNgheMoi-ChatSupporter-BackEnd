@@ -1,13 +1,14 @@
 import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
 import { FilterParamDto } from "../dto";
-import { FriendRequest } from "../entity";
+import { FriendRequest, User } from "../entity";
 const mongoose = require('mongoose');
 
 export class FriendRequestRepository {
     constructor(
         @InjectModel(FriendRequest.name) private readonly friendRequestModel: Model<FriendRequest>,
-    ){}
+        @InjectModel(User.name) private readonly userModel: Model<any>,
+    ) { }
 
     async createFriendRequest(fromUserId: string, toUserId: string) {
         const friendRequest = await new this.friendRequestModel({
@@ -25,7 +26,7 @@ export class FriendRequestRepository {
         await this.friendRequestModel.updateOne(
             {fromUserId, toUserId},
             {
-                $set: ({status, updatedAt: new Date().getTime()})
+                $set: ({ status, updatedAt: new Date().getTime() })
             }
         );
 
@@ -34,10 +35,10 @@ export class FriendRequestRepository {
 
     async findById(id: string) {
         const uid = mongoose.Types.ObjectId(id);
-        
+
         const list = await this.friendRequestModel.aggregate([
             {
-                $match: {_id: uid}
+                $match: { _id: uid }
             },
             {
                 $lookup: {
@@ -47,7 +48,7 @@ export class FriendRequestRepository {
                     as: "fromUser"
                 }
             },
-            {$unwind: '$fromUser'},
+            { $unwind: '$fromUser' },
             {
                 $project: {
                     "__v": 0,
@@ -68,12 +69,12 @@ export class FriendRequestRepository {
     async findAll(userId: string, filters: FilterParamDto) {
         const page = filters.page ? filters.page : 1;
         const perpage = filters.perPage ? filters.perPage : 10;
-        const skip = (page - 1)*perpage;
+        const skip = (page - 1) * perpage;
         const uid = mongoose.Types.ObjectId(userId);
-        
+
         const list = await this.friendRequestModel.aggregate([
             {
-                $match: {toUserId: uid, status: 'pending'}
+                $match: { toUserId: uid, status: 'pending' }
             },
             {
                 $lookup: {
@@ -83,7 +84,7 @@ export class FriendRequestRepository {
                     as: "fromUser"
                 }
             },
-            {$unwind: '$fromUser'},
+            { $unwind: '$fromUser' },
             {
                 $project: {
                     "__v": 0,
@@ -100,7 +101,7 @@ export class FriendRequestRepository {
                 }
             },
             {
-                $sort: {createdAt: -1}
+                $sort: { createdAt: -1 }
             },
             {
                 $skip: skip
@@ -116,11 +117,26 @@ export class FriendRequestRepository {
         const list = await this.friendRequestModel.find(
             {
                 $or: [
-                    { toUserId:  uid},
-                    { fromUserId: uid}
+                    { toUserId: uid },
+                    { fromUserId: uid }
                 ]
             }
         );
         return list;
     }
+
+    async removeFriendRequestAfterRequest(uesrRequestId: string, toUserId: string) {
+        const friendRequest = await this.friendRequestModel.findOne({
+            $and: [
+                { fromUserId: mongoose.Types.ObjectId(uesrRequestId) },
+                { toUserId: mongoose.Types.ObjectId(toUserId) }
+            ]
+        });
+        if (friendRequest && friendRequest.status === 'pending') {
+            await this.friendRequestModel.deleteOne({ _id: friendRequest._id });
+        } else {
+            throw new Error("Friend request not found or already accepted");
+        }
+    }
+
 }
