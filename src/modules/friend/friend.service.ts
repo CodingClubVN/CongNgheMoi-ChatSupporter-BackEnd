@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { EventSocketGateway } from "../../socket/socket.io";
-import { ConversationRepository, FriendRepository, FriendRequestRepository } from "../../repositories";
+import { ConversationRepository, FriendRepository, FriendRequestRepository, UserRepository } from "../../repositories";
 import { FilterParamDto, MessageCreateDto } from "../../dto";
 import { MessageService } from "../message/message.service";
 
@@ -11,6 +11,7 @@ export class FriendService {
         private friendRepository: FriendRepository,
         private friendRequestReposiory: FriendRequestRepository,
         private conversationRepository: ConversationRepository,
+        private userRepository: UserRepository,
         private messageService: MessageService,
         private socket: EventSocketGateway
     ) {}
@@ -38,16 +39,6 @@ export class FriendService {
 
         await this.friendRequestReposiory.updateStatus('approve', friendRequestId);
 
-        const message: MessageCreateDto = {
-            conversationId: conversation._id.toString(),
-            content: ['added friend to you'],
-            type: 'notification',
-            fromUserId: friendRequest.toUserId
-        }
-
-        await this.messageService.createMessage(message);
-
-        return true;
     }
 
     async rejectFriend(friendRequestId: string) {
@@ -66,4 +57,18 @@ export class FriendService {
         return list;
     }
 
+    async createNotificationMessage(conversationId: string, fromUserId: string, toUserId: string) {
+        const user = await 
+
+        const message: MessageCreateDto = {
+            conversationId: conversation._id.toString(),
+            content: ['added friend to you'],
+            type: 'notification',
+            fromUserId: friendRequest.toUserId
+        }
+
+        await this.messageService.createMessage(message);
+
+        return true;
+    }
 }
