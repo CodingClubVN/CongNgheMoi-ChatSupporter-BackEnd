@@ -51,7 +51,8 @@ export class FriendController {
     @UseGuards(JwtAuthGuard)
     async approveFriend(@Req() req, @Res() res: Response, @Body() body: FriendApproveDto) {
         try {
-            await this.friendService.approveFriend(body.friendRequestId);
+            const userId = req.user['userId'];
+            await this.friendService.approveFriend(body.fromUserId, userId);
             return res.status(200).json(new Successful('OK'));
         } catch (error) {
             console.log(error);
@@ -73,7 +74,8 @@ export class FriendController {
     @UseGuards(JwtAuthGuard)
     async rejectFriend(@Req() req, @Res() res: Response, @Body() body: FriendApproveDto) {
         try {
-            await this.friendService.rejectFriend(body.friendRequestId);
+            const userId = req.user['userId'];
+            await this.friendService.rejectFriend(body.fromUserId, userId);
             return res.status(200).json(new Successful('OK'));
         } catch (error) {
             console.log(error);

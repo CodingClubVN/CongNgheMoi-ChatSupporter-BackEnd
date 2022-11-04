@@ -2,9 +2,10 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { EventSocketGateway } from '../../socket/socket.io';
 import { Conversation, ConversationSchema, Friend, FriendRequest, FriendRequestSchema, FriendSchema, Message, MessageSchema, User, UserSchema } from '../../entity';
-import { ConversationRepository, FriendRepository, FriendRequestRepository, MessageRepository } from '../../repositories';
+import { ConversationRepository, FriendRepository, FriendRequestRepository, MessageRepository, UserRepository } from '../../repositories';
 import { FriendController } from './friend.controller';
 import { FriendService } from './friend.service';
+import { MessageService } from '../message/message.service';
 
 @Module({
     imports: [
@@ -17,7 +18,7 @@ import { FriendService } from './friend.service';
                 {name: FriendRequest.name, schema: FriendRequestSchema}]),
     ],
     controllers: [FriendController],
-    providers: [FriendService, FriendRepository, FriendRequestRepository, ConversationRepository, MessageRepository, EventSocketGateway],
+    providers: [FriendService, FriendRepository, FriendRequestRepository, ConversationRepository, MessageRepository, EventSocketGateway, MessageService, MessageRepository, UserRepository],
     exports: []
 })
 
