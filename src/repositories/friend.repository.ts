@@ -60,7 +60,7 @@ export class FriendRepository {
                     "friendId": 0,
                     "friend.account.password": 0,
                     "friend.__v": 0,
-                    "friend.fullname": 0,
+                    // "friend.fullname": 0,
                     "friend.email": 0,
                     "friend.phone": 0,
                     "friend.createdAt": 0,
