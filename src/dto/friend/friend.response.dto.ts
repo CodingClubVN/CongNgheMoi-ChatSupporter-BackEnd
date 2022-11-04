@@ -11,6 +11,8 @@ export class UserFriend {
     avatarUrl: string;
     @ApiProperty()
     account: AccountFriend;
+    @ApiProperty()
+    fullname: string;
 }
 
 export class FriendResponseDto {
