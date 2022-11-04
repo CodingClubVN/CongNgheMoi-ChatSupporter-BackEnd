@@ -11,7 +11,7 @@ export class FriendService {
         private friendRepository: FriendRepository,
         private friendRequestReposiory: FriendRequestRepository,
         private conversationRepository: ConversationRepository,
-        // private messageService: MessageService,
+        private messageService: MessageService,
         private socket: EventSocketGateway
     ) {}
     
@@ -26,32 +26,31 @@ export class FriendService {
         return newFriendRequest;
     }
 
-    async approveFriend(friendRequestId: string) {
-        const friendRequest = await this.friendRequestReposiory.findById(friendRequestId);
-        await this.friendRepository.createFriend(friendRequest.fromUserId, friendRequest.toUserId);
-        await this.friendRepository.createFriend(friendRequest.toUserId, friendRequest.fromUserId);
+    async approveFriend(fromUserId: string, userId: string) {
+        await this.friendRepository.createFriend(userId, fromUserId);
+        await this.friendRepository.createFriend(fromUserId, userId);
 
         const conversation = await this.conversationRepository.createConversation({
             conversationName: 'one-to-one-codingclub',
-            arrayUserId: [friendRequest.fromUserId, friendRequest.toUserId]
+            arrayUserId: [userId, fromUserId]
         });
 
-        await this.friendRequestReposiory.updateStatus('approve', friendRequestId);
+        await this.friendRequestReposiory.updateStatus('approve', fromUserId, userId);
 
-        const message: MessageCreateDto = {
-            conversationId: conversation._id.toString(),
-            content: ['added friend to you'],
-            type: 'notification',
-            fromUserId: friendRequest.toUserId
-        }
+        // const message: MessageCreateDto = {
+        //     conversationId: conversation._id.toString(),
+        //     content: ['added friend to you'],
+        //     type: 'notification',
+        //     fromUserId: friendRequest.toUserId
+        // }
 
         // await this.messageService.createMessage(message);
 
         return true;
     }
 
-    async rejectFriend(friendRequestId: string) {
-        await this.friendRequestReposiory.updateStatus('reject', friendRequestId);
+    async rejectFriend(fromUserId: string, userId: string) {
+        await this.friendRequestReposiory.updateStatus('reject', fromUserId, userId);
 
         return true;
     }

@@ -21,9 +21,9 @@ export class FriendRequestRepository {
         return friendRequest;
     }
 
-    async updateStatus(status: string, friendRequestId: string) {
+    async updateStatus(status: string, fromUserId: string, toUserId: string) {
         await this.friendRequestModel.updateOne(
-            {_id: friendRequestId},
+            {fromUserId, toUserId},
             {
                 $set: ({status, updatedAt: new Date().getTime()})
             }

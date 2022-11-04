@@ -5,6 +5,7 @@ import { Conversation, ConversationSchema, Friend, FriendRequest, FriendRequestS
 import { ConversationRepository, FriendRepository, FriendRequestRepository, MessageRepository } from '../../repositories';
 import { FriendController } from './friend.controller';
 import { FriendService } from './friend.service';
+import { MessageService } from '../message/message.service';
 
 @Module({
     imports: [
@@ -17,7 +18,7 @@ import { FriendService } from './friend.service';
                 {name: FriendRequest.name, schema: FriendRequestSchema}]),
     ],
     controllers: [FriendController],
-    providers: [FriendService, FriendRepository, FriendRequestRepository, ConversationRepository, MessageRepository, EventSocketGateway],
+    providers: [FriendService, FriendRepository, FriendRequestRepository, ConversationRepository, MessageRepository, EventSocketGateway, MessageService, MessageRepository],
     exports: []
 })
 
