@@ -10,6 +10,8 @@ export class UserFriendRequest {
     @ApiProperty()
     avatarUrl: string;
     @ApiProperty()
+    fullname: string;
+    @ApiProperty()
     account: AccountFriendRequest;
 }
 

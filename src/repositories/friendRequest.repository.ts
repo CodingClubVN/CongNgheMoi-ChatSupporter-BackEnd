@@ -92,7 +92,7 @@ export class FriendRequestRepository {
                     "status": 0,
                     "fromUser.account.password": 0,
                     "fromUser.__v": 0,
-                    "fromUser.fullname": 0,
+                    // "fromUser.fullname": 0,
                     "fromUser.email": 0,
                     "fromUser.phone": 0,
                     "fromUser.createdAt": 0,
