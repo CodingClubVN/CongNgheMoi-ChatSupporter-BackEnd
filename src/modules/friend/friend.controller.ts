@@ -1,15 +1,15 @@
 import { ApiBearerAuth, ApiOkResponse, ApiResponse, ApiTags } from "@nestjs/swagger";
-import { Body, Controller, Get, Post, Query, Req, Res, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post, Query, Req, Res, UseGuards } from "@nestjs/common";
 import { FriendService } from "./friend.service";
-import { FilterParamDto, FriendApproveDto, FriendRequestCreateDto, FriendRequestResponseDto, FriendResponseDto, InternalServerErrorDTO, Successful } from "../../dto";
+import { FilterParamDto, FriendApproveDto, FriendRequestCreateDto, FriendRequestResponseDto, FriendResponseDto, InternalServerErrorDTO, ResourceNotFoundException, Successful } from "../../dto";
 import { Response } from "express";
 import { JwtAuthGuard } from "../auth/auth.guard";
 @ApiBearerAuth()
 @ApiTags('api/friends')
 @Controller('api/friends')
 export class FriendController {
-    
-    constructor(private friendService: FriendService){}
+
+    constructor(private friendService: FriendService) { }
 
     @Post("request")
     @ApiOkResponse({
@@ -19,7 +19,7 @@ export class FriendController {
     @ApiResponse({
         status: 500,
         description: 'error',
-        type:  InternalServerErrorDTO,
+        type: InternalServerErrorDTO,
         isArray: false
     })
     @UseGuards(JwtAuthGuard)
@@ -31,7 +31,7 @@ export class FriendController {
 
             return res.status(200).json(new Successful('OK'));
 
-        }catch(error) {
+        } catch (error) {
             console.log(error);
             return res.status(500).json(new InternalServerErrorDTO());
         }
@@ -45,7 +45,7 @@ export class FriendController {
     @ApiResponse({
         status: 500,
         description: 'error',
-        type:  InternalServerErrorDTO,
+        type: InternalServerErrorDTO,
         isArray: false
     })
     @UseGuards(JwtAuthGuard)
@@ -67,7 +67,7 @@ export class FriendController {
     @ApiResponse({
         status: 500,
         description: 'error',
-        type:  InternalServerErrorDTO,
+        type: InternalServerErrorDTO,
         isArray: false
     })
     @UseGuards(JwtAuthGuard)
@@ -90,7 +90,7 @@ export class FriendController {
     @ApiResponse({
         status: 500,
         description: 'error',
-        type:  InternalServerErrorDTO,
+        type: InternalServerErrorDTO,
         isArray: false
     })
     @UseGuards(JwtAuthGuard)
@@ -99,7 +99,7 @@ export class FriendController {
             const userId = req.user['userId'];
             const list = await this.friendService.getAllFriendRequest(userId, filters);
             return res.status(200).json(list);
-        }catch(error) {
+        } catch (error) {
             console.log(error);
             return res.status(500).json(new InternalServerErrorDTO());
         }
@@ -114,7 +114,7 @@ export class FriendController {
     @ApiResponse({
         status: 500,
         description: 'error',
-        type:  InternalServerErrorDTO,
+        type: InternalServerErrorDTO,
         isArray: false
     })
     @UseGuards(JwtAuthGuard)
@@ -122,9 +122,37 @@ export class FriendController {
         try {
             const userId = req.user['userId'];
             const list = await this.friendService.getAllFriend(userId, filters);
-            
+
             return res.status(200).json(list);
-        }catch(error) {
+        } catch (error) {
+            console.log(error);
+            return res.status(500).json(new InternalServerErrorDTO());
+        }
+    }
+
+    @Post("request/user/:id/remove")
+    @ApiOkResponse({
+        status: 200,
+        type: Successful,
+    })
+    @ApiResponse({
+        status: 500,
+        description: 'error',
+        type: InternalServerErrorDTO,
+        isArray: false
+    })
+    @ApiResponse({
+        status: 404,
+        description: 'not found',
+        type: ResourceNotFoundException,
+    })
+    @UseGuards(JwtAuthGuard)
+    async removeFriendRequestAfterRequest(@Req() req, @Res() res: Response, @Param("id") toUserId: string) {
+        try {
+            const userId = req.user['userId'];
+            await this.friendService.removeFriendRequestAfterRequest(userId, toUserId);
+            return res.status(200).json(new Successful('Removed'));
+        } catch (error) {
             console.log(error);
             return res.status(500).json(new InternalServerErrorDTO());
         }
