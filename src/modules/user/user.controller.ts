@@ -52,7 +52,8 @@ export class UserController {
     @UseGuards(JwtAuthGuard)
     async getAllUser(@Req() req, @Res() res: Response, @Query() filters: FilterParamDto) {
         try {
-            const users = await this.userService.findAll(filters);
+            const userId = req.user['userId'];
+            const users = await this.userService.findAll(filters, userId);
             return res.status(200).json(users);
         } catch (error) {
             console.log(error);

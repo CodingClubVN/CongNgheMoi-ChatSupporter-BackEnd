@@ -110,4 +110,17 @@ export class FriendRequestRepository {
         ]);
         return list;
     }
+
+    async findByToUserIdOrFromUserId(userId: string) {
+        const uid = mongoose.Types.ObjectId(userId);
+        const list = await this.friendRequestModel.find(
+            {
+                $or: [
+                    { toUserId:  uid},
+                    { fromUserId: uid}
+                ]
+            }
+        );
+        return list;
+    }
 }

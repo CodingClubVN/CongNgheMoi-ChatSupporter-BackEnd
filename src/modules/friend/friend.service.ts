@@ -11,7 +11,7 @@ export class FriendService {
         private friendRepository: FriendRepository,
         private friendRequestReposiory: FriendRequestRepository,
         private conversationRepository: ConversationRepository,
-        private messageService: MessageService,
+        // private messageService: MessageService,
         private socket: EventSocketGateway
     ) {}
     
@@ -45,7 +45,7 @@ export class FriendService {
             fromUserId: friendRequest.toUserId
         }
 
-        await this.messageService.createMessage(message);
+        // await this.messageService.createMessage(message);
 
         return true;
     }
