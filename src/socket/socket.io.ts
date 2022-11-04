@@ -1,6 +1,6 @@
 import {SubscribeMessage, WebSocketGateway, WebSocketServer} from '@nestjs/websockets';
 import {Server, Socket} from 'socket.io';
-import { ConversationResponseDto, MessageResponseDto } from '../dto';
+import { ConversationResponseDto, FriendRequestResponseDto, FriendResponseDto, MessageResponseDto } from '../dto';
 
 @WebSocketGateway()
 export class EventSocketGateway {
@@ -43,5 +43,13 @@ export class EventSocketGateway {
 
 	public emitUpdateConversation(conversationResponse: any,listRoom: string[]) {
 		this.server.in(listRoom).emit('update-conversation', {conversation: conversationResponse});
+	}
+
+	public emitSendRequestFriend(userId: string, data: FriendRequestResponseDto) {
+		this.server.to(userId).emit('send-friend-request', data);
+	}
+
+	public emitAddfriend(userId: string, data: FriendResponseDto) {
+		this.server.to(userId).emit('approved-friend', data);
 	}
 }

@@ -1,17 +1,17 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { FirebaseUploadUtil } from '../../utils/firebase-upload.util';
-import { User, UserSchema } from '../../entity';
-import { UserRepository } from '../../repositories';
+import { FriendRequest, FriendRequestSchema, User, UserSchema } from '../../entity';
+import { FriendRequestRepository, UserRepository } from '../../repositories';
 import { UserController } from './user.controller';
 import { UserService } from './user.service';
 
 @Module({
     imports: [
-        MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
+        MongooseModule.forFeature([{ name: User.name, schema: UserSchema }, {name: FriendRequest.name, schema: FriendRequestSchema}]),
     ],
     controllers: [UserController],
-    providers: [UserRepository,FirebaseUploadUtil, UserService],
+    providers: [UserRepository,FirebaseUploadUtil, UserService, FriendRequestRepository],
     exports: []
 })
 export class UserModule {}

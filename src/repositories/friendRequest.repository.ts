@@ -33,8 +33,36 @@ export class FriendRequestRepository {
     }
 
     async findById(id: string) {
-        const friendRequest = await this.friendRequestModel.findById(id);
-        return friendRequest;
+        const uid = mongoose.Types.ObjectId(id);
+        
+        const list = await this.friendRequestModel.aggregate([
+            {
+                $match: {_id: uid}
+            },
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'fromUserId',
+                    foreignField: '_id',
+                    as: "fromUser"
+                }
+            },
+            {$unwind: '$fromUser'},
+            {
+                $project: {
+                    "__v": 0,
+                    "status": 0,
+                    "fromUser.account.password": 0,
+                    "fromUser.__v": 0,
+                    "fromUser.fullname": 0,
+                    "fromUser.email": 0,
+                    "fromUser.phone": 0,
+                    "fromUser.createdAt": 0,
+                    "fromUser.updatedAt": 0,
+                }
+            }
+        ]);
+        return list[0];
     }
 
     async findAll(userId: string, filters: FilterParamDto) {
@@ -80,6 +108,19 @@ export class FriendRequestRepository {
                 $limit: perpage
             }
         ]);
+        return list;
+    }
+
+    async findByToUserIdOrFromUserId(userId: string) {
+        const uid = mongoose.Types.ObjectId(userId);
+        const list = await this.friendRequestModel.find(
+            {
+                $or: [
+                    { toUserId:  uid},
+                    { fromUserId: uid}
+                ]
+            }
+        );
         return list;
     }
 }

@@ -27,6 +27,9 @@ export class UserResponseDto {
     @ApiProperty()
     createdAt: number;
 
+    @ApiProperty()
+    friendRequestStatus?: string;
+
     constructor(partial: Partial<UserResponseDto>) {
         Object.assign(this, partial);
     }
