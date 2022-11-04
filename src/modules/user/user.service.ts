@@ -26,25 +26,30 @@ export class UserService {
                 fullname: user.fullname,
                 phone: user.phone,
             };
-            // console.log(listFriendRequest.length);
             
 
             for(let item of listFriendRequest) {
                 if (user._id.toString() === item.fromUserId.toString()) {
                     data.friendRequestStatus = 'pending';
-                    list.push(data);
-                    break;
-                } else if (user._id.toString() === item.toUserId.toString()) {
-                    data.friendRequestStatus = 'request sent';
-                    list.push(data);
-                    break;
-                } else {
-                    data.friendRequestStatus = 'none'
-                    list.push(data);
+                    if (item.status === 'approve') {
+                        data.friendRequestStatus = 'friend';
+                    }
                     break;
                 }
-                
+                if (user._id.toString() === item.toUserId.toString()) {
+                    data.friendRequestStatus = 'request sent';
+                    
+                    if (item.status === 'approve') {
+                        data.friendRequestStatus = 'friend';
+                        if (item.status === 'approve') {
+                            data.friendRequestStatus = 'friend';
+                        }
+                    }
+                    break;
+                }
+                data.friendRequestStatus = 'none'
             }
+            list.push(data);
         }
         list = list.filter(item => item._id.toString() !== userId);
         return list;
