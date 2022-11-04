@@ -179,13 +179,14 @@ export class ConversationController {
     @ApiParam({ name: 'conversationId', required: true })
     @Put(':conversationId')
     @UseGuards(JwtAuthGuard)
-    async updateConversation( @Res() res: Response, @Param('conversationId') conversationId, @Body() conversationReq: ConversationUpdateDto) {
+    async updateConversation( @Req() req, @Res() res: Response, @Param('conversationId') conversationId, @Body() conversationReq: ConversationUpdateDto) {
         try {
+            const userId = req.user['userId'];
             const messageValidation = await this.conversationValidation.checkUpdateConversation(conversationReq);
             if (messageValidation.toString().length) {
                 return res.status(400).json(new BadRequestErrorDto([messageValidation]));
             }
-            const conversationUpdated = await this.conversationService.updateConversation(conversationId, conversationReq);
+            const conversationUpdated = await this.conversationService.updateConversation(conversationId, conversationReq, userId);
             return res.status(200).json(conversationUpdated);
         } catch (error) {
             console.log(error);

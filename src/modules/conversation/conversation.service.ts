@@ -42,7 +42,18 @@ export class ConversationService {
         return await this.conversationRepository.getAll(filters, userId);
     }
 
-    async updateConversation(conversationId: string, conversation: ConversationUpdateDto) {
+    async updateConversation(conversationId: string, conversation: ConversationUpdateDto, userId: string) {
+        const currentUser = await this.userRepository.findById(userId);
+        const content = currentUser.account.username + " changed the group's name to " + conversation.conversationName;
+
+        const message: MessageCreateDto = {
+            conversationId: conversationId,
+            content: [content],
+            type: 'notification',
+            fromUserId: userId
+        }
+
+        await this.messageService.createMessage(message);
         return await this.conversationRepository.updateConversation(conversationId, conversation);
     }
 
@@ -53,13 +64,13 @@ export class ConversationService {
     async removeUserFromConversation(userId: string, conversationId: string, currentUserId: string) {
         const currentUser = await this.userRepository.findById(currentUserId);
         const userRemove = await this.userRepository.findById(userId);
-        const content = currentUser.account.username + ' remove '+ userRemove.account.username+' from the group';
+        const content = currentUser.account.username + ' removed '+ userRemove.account.username+' from the group';
 
         const message: MessageCreateDto = {
             conversationId: conversationId,
             content: [content],
             type: 'notification',
-            fromUserId: userId
+            fromUserId: currentUserId
         }
 
         await this.messageService.createMessage(message);
