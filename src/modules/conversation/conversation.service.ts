@@ -1,19 +1,36 @@
 import { Injectable } from "@nestjs/common";
-import { ConversationCreateDto, ConversationUpdateDto, FilterParamDto } from "../../dto";
-import { ConversationRepository } from '../../repositories';
+import { ConversationCreateDto, ConversationUpdateDto, FilterParamDto, MessageCreateDto } from "../../dto";
+import { ConversationRepository, MessageRepository, UserRepository } from '../../repositories';
+import { MessageService } from "../message/message.service";
 
 
 @Injectable({})
 export class ConversationService {
 
-    constructor(private conversationRepository: ConversationRepository){}
+    constructor(private conversationRepository: ConversationRepository, private userRepository: UserRepository, private messageService: MessageService){}
 
     async createConversation(conversation: ConversationCreateDto) {
         const newConversation = await this.conversationRepository.createConversation(conversation);
         return {conversationId: newConversation._id};
     }
 
-    async addUserToConversation(arrayUserId: string[], conversationId: string) {
+    async addUserToConversation(arrayUserId: string[], conversationId: string, userId: string) {
+        const currentUser = await this.userRepository.findById(userId);
+        let arrayUserName = [];
+        for(let id of arrayUserId) {
+            const user = await this.userRepository.findById(id);
+            arrayUserName.push(user.account.username);
+        }
+        const content = currentUser.account.username + ' added '+ arrayUserName.toString()+' to the group';
+
+        const message: MessageCreateDto = {
+            conversationId: conversationId,
+            content: [content],
+            type: 'notification',
+            fromUserId: userId
+        }
+
+        await this.messageService.createMessage(message);
         return await this.conversationRepository.addUsersToGroup(arrayUserId, conversationId);
     }
     
@@ -33,7 +50,19 @@ export class ConversationService {
         await this.conversationRepository.updateReadStatus(userId, conversationId);
     }
 
-    async removeUserFromConversation(userId: string, conversationId: string) {
-        await this.conversationRepository.removeUserFromConversation(userId, conversationId);
+    async removeUserFromConversation(userId: string, conversationId: string, currentUserId: string) {
+        const currentUser = await this.userRepository.findById(currentUserId);
+        const userRemove = await this.userRepository.findById(userId);
+        const content = currentUser.account.username + ' remove '+ userRemove.account.username+' from the group';
+
+        const message: MessageCreateDto = {
+            conversationId: conversationId,
+            content: [content],
+            type: 'notification',
+            fromUserId: userId
+        }
+
+        await this.messageService.createMessage(message);
+        await this.conversationRepository.removeUserFromConversation(conversationId , userId);
     }
 }

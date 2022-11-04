@@ -69,8 +69,9 @@ export class ConversationController {
     @ApiParam({ name: 'conversationId', required: true })
     @Put(':conversationId/add-user')
     @UseGuards(JwtAuthGuard)
-    async addUserToConversation(@Res() res: Response, @Body() reqBody: ConversationAddUserDto, @Param('conversationId') conversationId) {
+    async addUserToConversation(@Req() req ,@Res() res: Response, @Body() reqBody: ConversationAddUserDto, @Param('conversationId') conversationId) {
         try {
+            const userId = req.user['userId'];
             const arrayUserId = reqBody.arrayUserId;
             for (let userId of arrayUserId) {
                 const messageValidation = await this.conversationValidation.checkUserFromConversationByUserId(conversationId, userId);
@@ -78,7 +79,7 @@ export class ConversationController {
                     return res.status(400).json(new BadRequestErrorDto([messageValidation]));
                 }
             }
-            await this.conversationService.addUserToConversation(arrayUserId, conversationId);
+            await this.conversationService.addUserToConversation(arrayUserId, conversationId, userId);
             return res.status(HttpStatus.OK).json(new Successful("add user to conversation successful!"))
         } catch (error) {
             console.log(error);
@@ -210,11 +211,12 @@ export class ConversationController {
     @ApiOperation({ summary: 'remove user from conversation' })
     @ApiParam({ name: 'conversationId', required: true })
     @ApiParam({ name: 'userId', required: true })
-    @Put(":conversationId/:userId/remove-user")
+    @Put(":conversationId/users/:userId/remove-user")
     @UseGuards(JwtAuthGuard)
-    async removeUserFromConversation(@Res() res: Response, @Param('conversationId') conversationId, @Param('userId') userId) {
+    async removeUserFromConversation( @Req() req ,@Res() res: Response, @Param('conversationId') conversationId, @Param('userId') userId) {
         try {
-            await this.conversationService.removeUserFromConversation(conversationId, userId);
+            const uid = req.user['userId'];
+            await this.conversationService.removeUserFromConversation(userId, conversationId, uid);
             return res.status(200).json(new Successful("remove user from conversation successful!"));
         } catch (error) {
             console.log(error);
