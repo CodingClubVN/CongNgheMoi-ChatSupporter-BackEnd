@@ -28,26 +28,30 @@ export class UserService {
             };
             
 
-            for(let item of listFriendRequest) {
-                if (user._id.toString() === item.fromUserId.toString()) {
-                    data.friendRequestStatus = 'pending';
-                    if (item.status === 'approve') {
-                        data.friendRequestStatus = 'friend';
-                    }
-                    break;
-                }
-                if (user._id.toString() === item.toUserId.toString()) {
-                    data.friendRequestStatus = 'request sent';
-                    
-                    if (item.status === 'approve') {
-                        data.friendRequestStatus = 'friend';
+            if (listFriendRequest.length) {
+                for(let item of listFriendRequest) {
+                    if (user._id.toString() === item.fromUserId.toString()) {
+                        data.friendRequestStatus = 'pending';
                         if (item.status === 'approve') {
                             data.friendRequestStatus = 'friend';
                         }
+                        break;
                     }
-                    break;
+                    if (user._id.toString() === item.toUserId.toString()) {
+                        data.friendRequestStatus = 'request sent';
+                        
+                        if (item.status === 'approve') {
+                            data.friendRequestStatus = 'friend';
+                            if (item.status === 'approve') {
+                                data.friendRequestStatus = 'friend';
+                            }
+                        }
+                        break;
+                    }
+                    data.friendRequestStatus = 'none';
                 }
-                data.friendRequestStatus = 'none'
+            }else {
+                data.friendRequestStatus = 'none';
             }
             list.push(data);
         }
