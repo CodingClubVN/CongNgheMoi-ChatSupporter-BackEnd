@@ -60,8 +60,8 @@ export class EventSocketGateway {
 	}
 
 	public emitUpdateFriend(userId: string, data: FriendResponseDto) {
-		console.log(userId,'update-friend-request', data);
+		console.log(userId,'update-friend', data);
 		
-		this.server.to(userId).emit('update-friend-request', data);
+		this.server.to(userId).emit('update-friend', data);
 	}
 }
