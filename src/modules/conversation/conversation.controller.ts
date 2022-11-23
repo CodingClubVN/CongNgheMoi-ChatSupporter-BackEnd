@@ -271,7 +271,7 @@ export class ConversationController {
                     return res.status(403).json({code: 403, message: 'Authentication Forbidden Error!'});
                 }
             }
-            await this.conversationService.changeRoleUser(conversationId, body.userId, body.role);
+            await this.conversationService.changeRoleUser(uid,conversationId, body.userId, body.role);
             return res.status(200).json(new Successful("update role user from conversation successful!"));
         } catch (error) {
             console.log(error);
@@ -305,6 +305,32 @@ export class ConversationController {
             }
             await this.conversationService.removeConversation(conversationId);
             return res.status(HttpStatus.OK).json(new Successful('remove conversation successfully'));
+        } catch (error) {
+            console.log(error);
+            return res.status(500).json(new InternalServerErrorDTO());
+        }
+    }
+
+    @ApiOkResponse({
+        status: 200,
+        type: Successful,
+        isArray: false
+    })
+    @ApiResponse({
+        status: 500,
+        description: 'error',
+        type: InternalServerErrorDTO,
+        isArray: false
+    })
+    @ApiOperation({ summary: 'leave conversation' })
+    @ApiParam({ name: 'conversationId', required: true })
+    @Post(':conversationId/leave')
+    @UseGuards(JwtAuthGuard)
+    async leaveConversation(@Req() req,@Res() res: Response, @Param('conversationId') conversationId) {
+        try {
+            const uid = req.user['userId'];
+            await this.conversationService.leaveConversation(conversationId, uid);
+            return res.status(HttpStatus.OK).json(new Successful('leaved conversation successfully'));
         } catch (error) {
             console.log(error);
             return res.status(500).json(new InternalServerErrorDTO());
