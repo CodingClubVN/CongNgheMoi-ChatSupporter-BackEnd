@@ -118,4 +118,14 @@ export class ConversationService {
         await this.messageService.createMessage(message);
         await this.conversationRepository.leaveConversation(conversationId, userId);
    }
+
+   async ramdomOwnerConversation(conversationId: string) {
+    const conversation = await this.conversationRepository.getConversationById(conversationId);
+    for (let user of conversation.users) {
+        if (user.account.role === 'admin') {
+            await this.conversationRepository.changeRoleForUser(conversationId, user._id.toString(), 'owner-admin');
+            break;
+        }
+    }
+   }
 }
