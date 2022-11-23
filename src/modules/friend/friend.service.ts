@@ -22,15 +22,16 @@ export class FriendService {
         delete data.fromUserId;
         delete data.toUserId;
 
-        this.socket.emitSendRequestFriend(friendId, data);
+        this.socket.emitUpdateFriendRequest(friendId, data);
 
         return newFriendRequest;
     }
 
     async approveFriend(fromUserId: string, userId: string) {
-        await this.friendRepository.createFriend(userId, fromUserId);
-        await this.friendRepository.createFriend(fromUserId, userId);
-
+        const friend_1 =  await this.friendRepository.createFriend(userId, fromUserId);
+        await this.emitFriendNew(userId, friend_1._id.toString());
+        const friend_2 = await this.friendRepository.createFriend(fromUserId, userId);
+        await this.emitFriendNew(fromUserId, friend_2._id.toString());
         const conversation = await this.conversationRepository.createConversation(OWNER_ID_ONE_TO_ONE,{
             conversationName: NAME_CONVERSATION_ONE_TO_ONE,
             arrayUserId: [userId, fromUserId]
@@ -72,6 +73,11 @@ export class FriendService {
     async removeFriendRequestAfterRequest(fromUserId: string, toUserId: string) {
         await this.friendRequestReposiory.removeFriendRequestAfterRequest(fromUserId, toUserId);
         return true;
+    }
+
+    async emitFriendNew(userId: string, friendId: string) {
+        const data = await this.friendRepository.findById(friendId);
+        this.socket.emitUpdateFriend(userId, data);
     }
 
 }

@@ -11,6 +11,7 @@ export class ConversationService {
 
     async createConversation(userId: string,conversation: ConversationCreateDto) {
         const newConversation = await this.conversationRepository.createConversation(userId,conversation);
+        await this.messageService.emitUpdateConversation(newConversation._id.toString());
         return {conversationId: newConversation._id};
     }
 
