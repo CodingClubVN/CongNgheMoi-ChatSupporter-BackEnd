@@ -57,4 +57,25 @@ export class MessageService {
 
         await this.createMessage(data);
     }
+
+    async answerMessage(content: string[], type: string, userId: string, conversationId: string, messageId: string) {
+        const message = await this.messageRepository.findById(messageId);
+        const data = {
+            conversationId,
+
+            content,
+
+            description: message.content.toString(),
+
+            type,
+
+            fromUserId: userId,
+
+            status: 'answer'
+        }
+
+       return await this.createMessage(data);
+    }
+
+
 }

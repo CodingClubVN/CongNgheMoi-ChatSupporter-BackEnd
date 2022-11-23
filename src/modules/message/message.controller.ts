@@ -49,6 +49,10 @@ export class MessageController {
                 description: {
                     type: 'string',
                     format: 'string'
+                },
+                messageAnswarId: {
+                    type: 'string',
+                    format: 'string'
                 }
             },
         },
@@ -76,7 +80,12 @@ export class MessageController {
             }else {
                 message.content.push(body.content);
             }
-            const newMessage = await this.messageService.createMessage(message);
+            let newMessage;
+            if (body.messageAnswarId) {
+                newMessage = await this.messageService.answerMessage(message.content,message.type,message.fromUserId,message.conversationId,body.messageAnswarId);
+            }else {
+                newMessage = await this.messageService.createMessage(message);
+            }
             return res.status(200).json(new MessageCreateResponseDto({messageId: newMessage._id}));
         }catch(error) {
             console.log(error);
