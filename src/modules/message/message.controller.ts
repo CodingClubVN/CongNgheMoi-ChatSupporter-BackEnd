@@ -3,7 +3,7 @@ import { FileInterceptor, FilesInterceptor } from "@nestjs/platform-express";
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOkResponse, ApiParam, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { Request, Response } from "express";
 import { FirebaseUploadUtil } from "../../utils/firebase-upload.util";
-import { DownloadFileRequestDto, FilterParamDto, InternalServerErrorDTO, MessageCreateDto, MessageCreateResponseDto, MessageResponseDto, MessageTranferDto, Successful } from "../../dto";
+import { DownloadFileRequestDto, FilterParamDto, InternalServerErrorDTO, MessageAllFiles, MessageCreateDto, MessageCreateResponseDto, MessageResponseDto, MessageTranferDto, Successful } from "../../dto";
 import { JwtAuthGuard } from "../auth/auth.guard";
 import { MessageService } from "./message.service";
 import { createReadStream, existsSync, mkdirSync, readdir, unlink } from 'fs';
@@ -49,6 +49,10 @@ export class MessageController {
                 description: {
                     type: 'string',
                     format: 'string'
+                },
+                messageAnswarId: {
+                    type: 'string',
+                    format: 'string'
                 }
             },
         },
@@ -76,7 +80,12 @@ export class MessageController {
             }else {
                 message.content.push(body.content);
             }
-            const newMessage = await this.messageService.createMessage(message);
+            let newMessage;
+            if (body.messageAnswarId) {
+                newMessage = await this.messageService.answerMessage(message.content,message.type,message.fromUserId,message.conversationId,body.messageAnswarId);
+            }else {
+                newMessage = await this.messageService.createMessage(message);
+            }
             return res.status(200).json(new MessageCreateResponseDto({messageId: newMessage._id}));
         }catch(error) {
             console.log(error);
@@ -193,6 +202,29 @@ export class MessageController {
             const userId = req.user['userId'];
             await this.messageService.tranferMessage(body.messageId, userId, conversationId);
             return res.status(200).json(new Successful("OK"));
+        }catch(error) {
+            console.log(error);
+            return res.status(500).json(new InternalServerErrorDTO());
+        }
+    }
+
+    @Get('/files/conversation/:conversationId')
+    @ApiOkResponse({
+        status: 200,
+        type:  MessageAllFiles,
+    })
+    @ApiResponse({
+        status: 500,
+        description: 'error',
+        type:  InternalServerErrorDTO,
+        isArray: false
+    })
+    @ApiParam({name: 'conversationId', required: true})
+    @UseGuards(JwtAuthGuard)
+    async getAllFileById(@Req() req, @Res() res: Response, @Param('conversationId') conversationId: string) {
+        try {
+            const result = await this.messageService.getAllFileById(conversationId);
+            return res.status(200).json(result);
         }catch(error) {
             console.log(error);
             return res.status(500).json(new InternalServerErrorDTO());

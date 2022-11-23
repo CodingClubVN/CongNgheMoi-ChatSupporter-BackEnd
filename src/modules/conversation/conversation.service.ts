@@ -78,11 +78,44 @@ export class ConversationService {
         await this.conversationRepository.removeUserFromConversation(conversationId , userId);
     }
 
-    async changeRoleUser(conversationId: string, userId: string, role: string) {
+    async changeRoleUser(ownerId: string,conversationId: string, userId: string, role: string) {
+        const ownerUser = await this.userRepository.findById(ownerId);
+        const memberUser = await this.userRepository.findById(userId);
+        const content = ownerUser.account.username + ' has changed '+ memberUser.account.username+' role to ' + role;
+
+        const message: MessageCreateDto = {
+            conversationId: conversationId,
+            content: [content],
+            type: 'notification',
+            fromUserId: ownerId
+        }
+
+        await this.messageService.createMessage(message);
+
         await this.conversationRepository.changeRoleForUser(conversationId, userId, role);
     }
 
     async findRoleConversationByUserId(conversationId: string, userId: string) {
         return await this.conversationRepository.findRoleConversationByUserId(conversationId, userId);
     }
+
+    async removeConversation(id: string) {
+        await this.conversationRepository.removeConversation(id);
+   }
+
+   async leaveConversation(conversationId: string, userId: string) {
+
+        const ownerUser = await this.userRepository.findById(userId);
+        const content = ownerUser.account.username + ' has left the group';
+
+        const message: MessageCreateDto = {
+            conversationId: conversationId,
+            content: [content],
+            type: 'notification',
+            fromUserId: userId
+        }
+
+        await this.messageService.createMessage(message);
+        await this.conversationRepository.leaveConversation(conversationId, userId);
+   }
 }

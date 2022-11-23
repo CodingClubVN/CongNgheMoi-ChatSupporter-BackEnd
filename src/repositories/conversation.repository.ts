@@ -298,4 +298,20 @@ export class ConversationRepository {
         }
         return null;
     }
+
+    async removeConversation(conversationId: string) {
+        const conversation = await this.conversationModel.findOne({_id: conversationId});
+        await conversation.remove()
+    }
+
+    async leaveConversation(conversationId: string, userId: string) {
+        const conversation = await this.conversationModel.findOne({_id: conversationId});
+        const users = conversation.users.filter(item => item.userId.toString() !== userId);
+        await this.conversationModel.updateOne(
+            {_id: conversationId},
+            {
+                $set: ({users})
+            }
+        );
+    }
 }
