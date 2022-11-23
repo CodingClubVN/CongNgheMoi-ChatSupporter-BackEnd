@@ -105,4 +105,14 @@ export class MessageRepository {
         const newMessage = await this.createMessage(message);
         return newMessage;
     }
+
+    async getAllFileById(id: string) {
+        const messages = await this.messageModel.find({conversationId: id, $or: [
+            { type:  "image"},
+            { type: "file"},
+            { type: "video"}
+        ]});
+
+        return messages;
+    }
 }

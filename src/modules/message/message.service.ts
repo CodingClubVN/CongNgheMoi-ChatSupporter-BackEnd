@@ -77,5 +77,34 @@ export class MessageService {
        return await this.createMessage(data);
     }
 
+    async getAllFileById(id: string) {
+        const messages = await this.messageRepository.getAllFileById(id);
 
+        let images = [];
+        let files = [];
+        let videos = [];
+        for (let message of messages) {
+            if (message.type === 'image') {
+                for (let content of message.content) {
+                    images.push(content);
+                }
+            }
+            if (message.type === 'file') {
+                for (let content of message.content) {
+                    files.push(content);
+                }
+            }
+            if (message.type === 'video') {
+                for (let content of message.content) {
+                    videos.push(content);
+                }
+            }
+        }
+
+        return {
+            images,
+            files,
+            videos
+        }
+    }
 }
