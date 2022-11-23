@@ -85,4 +85,8 @@ export class ConversationService {
     async findRoleConversationByUserId(conversationId: string, userId: string) {
         return await this.conversationRepository.findRoleConversationByUserId(conversationId, userId);
     }
+
+    async removeConversation(id: string) {
+        await this.conversationRepository.removeConversation(id);
+   }
 }

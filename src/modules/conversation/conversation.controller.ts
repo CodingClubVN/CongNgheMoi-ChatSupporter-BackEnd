@@ -1,4 +1,4 @@
-import { Controller, Get, HttpStatus, Post, Req, Res, UseGuards, Body, Param, Put, Query, Patch } from "@nestjs/common";
+import { Controller, Get, HttpStatus, Post, Req, Res, UseGuards, Body, Param, Put, Query, Patch, Delete } from "@nestjs/common";
 import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiParam, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { Request, Response } from "express";
 import { ConversationValidation } from "../../validations";
@@ -273,6 +273,38 @@ export class ConversationController {
             }
             await this.conversationService.changeRoleUser(conversationId, body.userId, body.role);
             return res.status(200).json(new Successful("update role user from conversation successful!"));
+        } catch (error) {
+            console.log(error);
+            return res.status(500).json(new InternalServerErrorDTO());
+        }
+    }
+
+
+    @ApiOkResponse({
+        status: 200,
+        type: Successful,
+        isArray: false
+    })
+    @ApiResponse({
+        status: 500,
+        description: 'error',
+        type: InternalServerErrorDTO,
+        isArray: false
+    })
+    @ApiOperation({ summary: 'remove conversation' })
+    @ApiParam({ name: 'conversationId', required: true })
+    @Delete(':conversationId')
+    @UseGuards(JwtAuthGuard)
+    async removeConversation(@Req() req,@Res() res: Response, @Param('conversationId') conversationId) {
+        try {
+            const uid = req.user['userId'];
+            const role = await this.conversationService.findRoleConversationByUserId(conversationId,uid);
+
+            if (role !== 'owner-admin') {
+                return res.status(403).json({code: 403, message: 'Authentication Forbidden Error!'});
+            }
+            await this.conversationService.removeConversation(conversationId);
+            return res.status(HttpStatus.OK).json(new Successful('remove conversation successfully'));
         } catch (error) {
             console.log(error);
             return res.status(500).json(new InternalServerErrorDTO());

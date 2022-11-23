@@ -298,4 +298,9 @@ export class ConversationRepository {
         }
         return null;
     }
+
+    async removeConversation(conversationId: string) {
+        const conversation = await this.conversationModel.findOne({_id: conversationId});
+        await conversation.remove()
+    }
 }
