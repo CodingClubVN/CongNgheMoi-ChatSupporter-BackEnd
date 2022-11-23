@@ -329,6 +329,12 @@ export class ConversationController {
     async leaveConversation(@Req() req,@Res() res: Response, @Param('conversationId') conversationId) {
         try {
             const uid = req.user['userId'];
+            
+            const role = await this.conversationService.findRoleConversationByUserId(conversationId,uid);
+            
+            if(role === 'owner-admin') {
+                await this.conversationService.ramdomOwnerConversation(conversationId);
+            }
             await this.conversationService.leaveConversation(conversationId, uid);
             return res.status(HttpStatus.OK).json(new Successful('leaved conversation successfully'));
         } catch (error) {
