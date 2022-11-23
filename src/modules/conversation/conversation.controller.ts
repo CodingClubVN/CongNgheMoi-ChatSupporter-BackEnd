@@ -2,9 +2,10 @@ import { Controller, Get, HttpStatus, Post, Req, Res, UseGuards, Body, Param, Pu
 import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiParam, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { Request, Response } from "express";
 import { ConversationValidation } from "../../validations";
-import { BadRequestErrorDto, ConversationAddUserDto, ConversationCreateDto, ConversationCreateResponseDto, ConversationResponseDto, ConversationUpdateDto, FilterParamDto, InternalServerErrorDTO, ListConversationResponseDto, ResourceNotFoundException, Successful } from "../../dto";
+import { BadRequestErrorDto, ConversationAddUserDto, ConversationCreateDto, ConversationCreateResponseDto, ConversationResponseDto, ConversationUpdateDto, ConversationUpdateRoleUser, FilterParamDto, InternalServerErrorDTO, ListConversationResponseDto, ResourceNotFoundException, Successful } from "../../dto";
 import { JwtAuthGuard } from "../auth/auth.guard";
 import { ConversationService } from "./conversation.service";
+import { ROLES_CONVERSATION } from "../../config/constants";
 
 @ApiBearerAuth()
 @ApiTags('api/conversation')
@@ -39,7 +40,7 @@ export class ConversationController {
             if (messageValidation.toString().length) {
                 return res.status(400).json(new BadRequestErrorDto([messageValidation]));
             }
-            const result = await this.conversationService.createConversation(conversationReq);
+            const result = await this.conversationService.createConversation(userId, conversationReq);
             return res.status(200).json(new ConversationCreateResponseDto({ conversationId: result.conversationId }));
         } catch (error) {
             console.log(error);
@@ -217,8 +218,61 @@ export class ConversationController {
     async removeUserFromConversation( @Req() req ,@Res() res: Response, @Param('conversationId') conversationId, @Param('userId') userId) {
         try {
             const uid = req.user['userId'];
+            const role = await this.conversationService.findRoleConversationByUserId(conversationId,uid);
+            if (role === 'member') {
+                return res.status(403).json({code: 403, message: 'Authentication Forbidden Error!'});
+            }
+            if (role === 'admin') {
+                const role_check = await this.conversationService.findRoleConversationByUserId(conversationId,userId);
+                if (role_check === 'owner-admin') {
+                    return res.status(403).json({code: 403, message: 'Authentication Forbidden Error!'});
+                }
+            }
             await this.conversationService.removeUserFromConversation(userId, conversationId, uid);
             return res.status(200).json(new Successful("remove user from conversation successful!"));
+        } catch (error) {
+            console.log(error);
+            return res.status(500).json(new InternalServerErrorDTO());
+        }
+    }
+
+
+    @ApiOkResponse({
+        status: 200,
+        type: Successful,
+    })
+    @ApiResponse({
+        status: 500,
+        description: 'error',
+        type: InternalServerErrorDTO,
+        isArray: false
+    })
+    @ApiOperation({ summary: 'update role for user' })
+    @ApiParam({ name: 'conversationId', required: true })
+    @Put(':conversationId/role')
+    @UseGuards(JwtAuthGuard)
+    async updateRoleUserFromConversation( @Req() req ,@Res() res: Response, @Param('conversationId') conversationId, @Body() body: ConversationUpdateRoleUser) {
+        try {
+            const uid = req.user['userId'];
+
+            if (!ROLES_CONVERSATION.includes(body.role)) {
+                return res.status(400).json(new BadRequestErrorDto(['role must admin | member']));
+            }
+
+            const role = await this.conversationService.findRoleConversationByUserId(conversationId,uid);
+
+            if (role === 'member') {
+                return res.status(403).json({code: 403, message: 'Authentication Forbidden Error!'});
+            }
+
+            if (role === 'admin') {
+                const role_check = await this.conversationService.findRoleConversationByUserId(conversationId, body.userId);
+                if (role_check === 'owner-admin') {
+                    return res.status(403).json({code: 403, message: 'Authentication Forbidden Error!'});
+                }
+            }
+            await this.conversationService.changeRoleUser(conversationId, body.userId, body.role);
+            return res.status(200).json(new Successful("update role user from conversation successful!"));
         } catch (error) {
             console.log(error);
             return res.status(500).json(new InternalServerErrorDTO());

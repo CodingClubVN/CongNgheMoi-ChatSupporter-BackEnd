@@ -9,8 +9,8 @@ export class ConversationService {
 
     constructor(private conversationRepository: ConversationRepository, private userRepository: UserRepository, private messageService: MessageService){}
 
-    async createConversation(conversation: ConversationCreateDto) {
-        const newConversation = await this.conversationRepository.createConversation(conversation);
+    async createConversation(userId: string,conversation: ConversationCreateDto) {
+        const newConversation = await this.conversationRepository.createConversation(userId,conversation);
         return {conversationId: newConversation._id};
     }
 
@@ -75,5 +75,13 @@ export class ConversationService {
 
         await this.messageService.createMessage(message);
         await this.conversationRepository.removeUserFromConversation(conversationId , userId);
+    }
+
+    async changeRoleUser(conversationId: string, userId: string, role: string) {
+        await this.conversationRepository.changeRoleForUser(conversationId, userId, role);
+    }
+
+    async findRoleConversationByUserId(conversationId: string, userId: string) {
+        return await this.conversationRepository.findRoleConversationByUserId(conversationId, userId);
     }
 }

@@ -5,6 +5,10 @@ export class UserModel {
     @ApiProperty()
     userId: string;
 
+    @ApiProperty()
+    role: string;
+
+
     // @ApiProperty()
     // username: string;
 

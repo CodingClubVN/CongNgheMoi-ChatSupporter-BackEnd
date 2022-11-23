@@ -3,6 +3,7 @@ import { EventSocketGateway } from "../../socket/socket.io";
 import { ConversationRepository, FriendRepository, FriendRequestRepository, UserRepository } from "../../repositories";
 import { FilterParamDto, MessageCreateDto } from "../../dto";
 import { MessageService } from "../message/message.service";
+import { NAME_CONVERSATION_ONE_TO_ONE, OWNER_ID_ONE_TO_ONE } from "../../config/constants";
 
 @Injectable({})
 export class FriendService {
@@ -30,8 +31,8 @@ export class FriendService {
         await this.friendRepository.createFriend(userId, fromUserId);
         await this.friendRepository.createFriend(fromUserId, userId);
 
-        const conversation = await this.conversationRepository.createConversation({
-            conversationName: 'one-to-one-codingclub',
+        const conversation = await this.conversationRepository.createConversation(OWNER_ID_ONE_TO_ONE,{
+            conversationName: NAME_CONVERSATION_ONE_TO_ONE,
             arrayUserId: [userId, fromUserId]
         });
 

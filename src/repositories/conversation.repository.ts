@@ -4,6 +4,7 @@ import { Model } from "mongoose";
 import { ConversationCreateDto, FilterParamDto, ListConversationResponseDto, ConversationUpdateDto, MessageResponseDto } from "../dto";
 import { MessageModel } from "src/entity/models/message.model";
 import { User, Conversation } from "../entity";
+import { OWNER_ID_ONE_TO_ONE } from "../config/constants";
 const mongoose = require('mongoose');
 
 
@@ -15,14 +16,22 @@ export class ConversationRepository {
 
     }
 
-    async createConversation(conversation: ConversationCreateDto) {
+    async createConversation(ownerId: string, conversation: ConversationCreateDto) {
         try {
             let users = [];
             for (let userId of conversation.arrayUserId) {
                 const user = await this.userModel.findById(userId);
-                users.push({
-                    userId: user._id
-                });
+                if (userId === ownerId || ownerId===OWNER_ID_ONE_TO_ONE) {
+                    users.push({
+                        userId: user._id,
+                        role: 'owner-admin'
+                    });
+                }else {
+                    users.push({
+                        userId: user._id,
+                        role: 'member'
+                    });
+                }
             }
             const newConversation = await new this.conversationModel(
                 {
@@ -46,7 +55,8 @@ export class ConversationRepository {
             for (let userId of litsUserId) {
                 const user = await this.userModel.findById(userId);
                 users.push({
-                    userId: user._id
+                    userId: user._id,
+                    role: "member"
                 });
             }
             await this.conversationModel.updateOne(
@@ -104,7 +114,16 @@ export class ConversationRepository {
                     }
                 }
             ]);
-            return conversations[0];
+            const conversation = conversations[0];
+            const con = await this.conversationModel.findOne({_id: id});
+            for (let user of conversation.users) {
+                for(let i of con.users) {
+                    if (user._id.toString() === i.userId.toString()) {
+                        user.account.role = i.role;
+                    }
+                }
+            }
+            return conversation;
         } catch (error) {
             throw new InternalServerErrorException(error);
         }
@@ -251,5 +270,32 @@ export class ConversationRepository {
         }
         
         
+    }
+
+    async changeRoleForUser(conversationId: string, userId: string, role: string) {
+        const conversation = await this.conversationModel.findOne({_id: conversationId});
+        const users = conversation.users;
+        for (let user of users) {
+            if (user.userId.toString() === userId) {
+                user.role = role;
+            }
+        }
+        
+        await this.conversationModel.updateOne(
+            {_id: mongoose.Types.ObjectId(conversationId)},
+            {
+                $set: ({users})
+            }
+        )
+    }
+
+    async findRoleConversationByUserId(conversationId: string, userId: string) {
+        const conversation = await this.conversationModel.findOne({_id: conversationId});
+        for (let user of conversation.users) {
+            if (user.userId.toString() === userId) {
+                return user.role;
+            }
+        }
+        return null;
     }
 }
