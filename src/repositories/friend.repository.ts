@@ -78,5 +78,41 @@ export class FriendRepository {
         ]);
         return list;
     }
-    
+
+    async findById(id: string) {
+        const uid = mongoose.Types.ObjectId(id);
+        
+        const list = await this.friendModel.aggregate([
+            {
+                $match: {_id: uid}
+            },
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'friendId',
+                    foreignField: '_id',
+                    as: "friend"
+                }
+            },
+            {$unwind: '$friend'},
+            {
+                $project: {
+                    "__v": 0,
+                    "userId": 0,
+                    "friendId": 0,
+                    "friend.account.password": 0,
+                    "friend.__v": 0,
+                    // "friend.fullname": 0,
+                    "friend.email": 0,
+                    "friend.phone": 0,
+                    "friend.createdAt": 0,
+                    "friend.updatedAt": 0,
+                }
+            },
+            {
+                $sort: {createdAt: -1}
+            },
+        ]);
+        return list[0];
+    }
 }

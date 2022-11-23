@@ -112,17 +112,17 @@ export class UserController {
     async updateUserProfile(@Res() res: Response, @Param('userId') userId: string, @Body() body , @UploadedFile() file: Express.Multer.File) {
 
         try {
-            if (!file) {
-                return res.status(404).json(new ResourceNotFoundException("file is required"));
-            }
-            await this.firebase.uploadFile(file);
-            const url = this.firebase.getUrlUpload(file.originalname);
             let user: UserUpdateDto={
                 fullname: body.fullname,
-                avatarUrl: url,
+                // avatarUrl: url,
                 phone: body.phone,
                 about: body.about,
                 yearOrBirth: body.yearOrBirth
+            }
+            if (file) {
+                await this.firebase.uploadFile(file);
+                const url = this.firebase.getUrlUpload(file.originalname);
+                user.avatarUrl = url;
             }
             const userUpdate = await this.userService.updateUserProfile(userId, user);
             return res.status(200).json(userUpdate);

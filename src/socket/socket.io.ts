@@ -45,11 +45,23 @@ export class EventSocketGateway {
 		this.server.in(listRoom).emit('update-conversation', {conversation: conversationResponse});
 	}
 
-	public emitSendRequestFriend(userId: string, data: FriendRequestResponseDto) {
-		this.server.to(userId).emit('send-friend-request', data);
+	// public emitSendRequestFriend(userId: string, data: FriendRequestResponseDto) {
+	// 	this.server.to(userId).emit('send-friend-request', data);
+	// }
+
+	// public emitAddfriend(userId: string, data: FriendResponseDto) {
+	// 	this.server.to(userId).emit('approved-friend', data);
+	// }
+
+	public emitUpdateFriendRequest(userId: string,data: FriendRequestResponseDto) {
+		console.log(userId,'update-friend-request', data);
+		
+		this.server.to(userId).emit('update-friend-request', data);
 	}
 
-	public emitAddfriend(userId: string, data: FriendResponseDto) {
-		this.server.to(userId).emit('approved-friend', data);
+	public emitUpdateFriend(userId: string, data: FriendResponseDto) {
+		console.log(userId,'update-friend-request', data);
+		
+		this.server.to(userId).emit('update-friend-request', data);
 	}
 }

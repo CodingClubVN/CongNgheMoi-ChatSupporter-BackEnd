@@ -3,6 +3,7 @@ import { EventSocketGateway } from "../../socket/socket.io";
 import { ConversationRepository, FriendRepository, FriendRequestRepository, UserRepository } from "../../repositories";
 import { FilterParamDto, MessageCreateDto } from "../../dto";
 import { MessageService } from "../message/message.service";
+import { NAME_CONVERSATION_ONE_TO_ONE, OWNER_ID_ONE_TO_ONE } from "../../config/constants";
 
 @Injectable({})
 export class FriendService {
@@ -21,17 +22,18 @@ export class FriendService {
         delete data.fromUserId;
         delete data.toUserId;
 
-        this.socket.emitSendRequestFriend(friendId, data);
+        this.socket.emitUpdateFriendRequest(friendId, data);
 
         return newFriendRequest;
     }
 
     async approveFriend(fromUserId: string, userId: string) {
-        await this.friendRepository.createFriend(userId, fromUserId);
-        await this.friendRepository.createFriend(fromUserId, userId);
-
-        const conversation = await this.conversationRepository.createConversation({
-            conversationName: 'one-to-one-codingclub',
+        const friend_1 =  await this.friendRepository.createFriend(userId, fromUserId);
+        await this.emitFriendNew(userId, friend_1._id.toString());
+        const friend_2 = await this.friendRepository.createFriend(fromUserId, userId);
+        await this.emitFriendNew(fromUserId, friend_2._id.toString());
+        const conversation = await this.conversationRepository.createConversation(OWNER_ID_ONE_TO_ONE,{
+            conversationName: NAME_CONVERSATION_ONE_TO_ONE,
             arrayUserId: [userId, fromUserId]
         });
 
@@ -71,6 +73,11 @@ export class FriendService {
     async removeFriendRequestAfterRequest(fromUserId: string, toUserId: string) {
         await this.friendRequestReposiory.removeFriendRequestAfterRequest(fromUserId, toUserId);
         return true;
+    }
+
+    async emitFriendNew(userId: string, friendId: string) {
+        const data = await this.friendRepository.findById(friendId);
+        this.socket.emitUpdateFriend(userId, data);
     }
 
 }
