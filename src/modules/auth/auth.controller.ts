@@ -2,7 +2,7 @@ import { Body, Controller, HttpStatus, Post, Res } from "@nestjs/common";
 import { ApiOkResponse, ApiResponse, ApiTags } from "@nestjs/swagger/dist";
 import { Response } from "express";
 import { UserValidation } from "../../validations";
-import { AuthResponseDto, BadRequestErrorDto, InternalServerErrorDTO, LoginRequestDto, UserCreatedResponse, UserCreateDto } from "../../dto";
+import { AuthResponseDto, BadRequestErrorDto, InternalServerErrorDTO, LoginRequestDto, Successful, UserCreatedResponse, UserCreateDto } from "../../dto";
 import { AuthService } from "./auth.service";
 
 
@@ -69,6 +69,17 @@ export class AuthController{
             }
             const newUser =  await this.authService.register(userReq);
             return res.status(200).json(new UserCreatedResponse({userId: newUser._id}));
+        }catch(error) {
+            console.log(error);
+            return res.status(500).json(new InternalServerErrorDTO());  
+        }
+    }
+
+    @Post('send-otp')
+    async sendOTP(@Res() res: Response) {
+        try {
+            await this.authService.sendOTPComfirm();
+            return res.status(200).json(new Successful('OK'));
         }catch(error) {
             console.log(error);
             return res.status(500).json(new InternalServerErrorDTO());  

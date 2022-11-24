@@ -19,7 +19,7 @@ import { EventSocketGateway } from './socket/socket.io';
     MongooseModule.forRootAsync({
       imports: [ConfigModule, 
         ServeStaticModule.forRoot({
-          rootPath: join(__dirname, '..', 'download'),
+          rootPath: join(__dirname, '..', 'email'),
         }),
       ],
       useFactory: async (config: ConfigService) => ({
