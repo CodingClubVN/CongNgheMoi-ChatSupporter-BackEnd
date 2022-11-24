@@ -1,40 +1,25 @@
 version: '3.8'
 
 services:
-    dev:
-        container_name: nestjs_api_dev
-        image: nestjs-api-dev:1.0.0
-        build:
-            context: .
-            target: development
-            dockerfile: ./Dockerfile
-        command: npm run start:debug
-        ports:
-            - 5000:5000
-            - 9229:9229
-        networks:
-            - nesjs-network
-        volumes:
-            - .:/usr/src/app
-            - /usr/src/app/node_modules
-        restart: unless-stopped
     prod:
         container_name: nestjs_api_prod
         image: nestjs-api-prod:1.0.0
+        environment:
+            URL_MONGO_DB: ${URL_MONGO_DB}
+            SECRET_TOKEN: ${SECRET_TOKEN}
+            EXPIRESIN_TOKEN: ${EXPIRESIN_TOKEN}
+            FIREBASE_PROJECT_ID: ${FIREBASE_PROJECT_ID}
+            FIREBASE_PRIVATE_KEY: ${FIREBASE_PRIVATE_KEY}
+            FIREBASE_EMAIL_CLIENT: ${FIREBASE_EMAIL_CLIENT}
         build:
             context: .
-            target: production
-            dockerfile: ./Dockerfile
+            dockerfile: Dockerfile
+            args:
+                - NODE_ENV=production
         command: npm run start:prod
         ports:
             - 5000:5000
-            - 9229:9229
-        networks:
-            - nesjs-network
         volumes:
             - .:/usr/src/app
             - /usr/src/app/node_modules
         restart: unless-stopped
-
-networks:
-    nesjs-network:

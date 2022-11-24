@@ -3,11 +3,15 @@ import { LoginRequestDto, UserCreateDto } from "../../dto";
 import { UserRepository } from "../../repositories/user.repository";
 import * as bcrypt from 'bcrypt';
 import { JwtService } from "@nestjs/jwt";
+import { MailerService } from "@nestjs-modules/mailer";
 
 @Injectable({})
 export class AuthService {
 
-    constructor(private userRepository: UserRepository, private jwtService: JwtService){}
+    constructor(
+        private userRepository: UserRepository, 
+        private jwtService: JwtService,
+        private mailerService: MailerService){}
 
     async login(account: LoginRequestDto) {
         const user = await this.userRepository.findOneByUsername(account.username);
@@ -17,10 +21,10 @@ export class AuthService {
         const isMatch = await bcrypt.compare(account.password, user.account.password);
 
         if (isMatch) {
-            const payload = {userId: user.id}
+            const payload = {userId: user._id}
             const token= this.generateToken(payload);
 
-            return {token};
+            return {token,userId: user._id};
         }else {
             return null;
         }
@@ -42,5 +46,19 @@ export class AuthService {
 
     private generateToken(payload: any): string {
         return this.jwtService.sign(payload);
+    }
+
+    async sendOTPComfirm() {
+        const res = await this.mailerService.sendMail({
+            to: 'thaihoc95x@gmail.com',
+            subject: 'Coding Club OTP confirm!',
+            template: './otp-confirm',
+            context: {
+                name: 'MR.Hira',
+                otp: '010291'
+            }
+        });
+        console.log(res);
+        
     }
 }

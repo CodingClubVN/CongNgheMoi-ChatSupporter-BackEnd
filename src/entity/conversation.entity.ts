@@ -13,17 +13,17 @@ export class Conversation extends Document {
     @Prop({default: []})
     users: UserModel[];
     
-    @Prop({default: []})
+    @Prop({type: MessageModel,default: null})
     lastMessage: MessageModel;
     
     @Prop({default: []})
     readStatus: Object[];
 
-    @Prop({default: Date.now()})
-    createdAt: Date;
+    @Prop()
+    createdAt: number;
 
-    @Prop({default: Date.now()})
-    updatedAt: Date;
+    @Prop()
+    updatedAt: number;
 }
 
 export const ConversationSchema = SchemaFactory.createForClass(Conversation);
