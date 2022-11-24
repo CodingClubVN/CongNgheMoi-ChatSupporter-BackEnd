@@ -11,7 +11,8 @@ import { UserModule } from '../user/user.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtStrategy } from './auth.strategy';
-
+import { MailerModule } from '@nestjs-modules/mailer';
+import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 @Module({
     imports: [
         UserModule,
@@ -32,6 +33,30 @@ import { JwtStrategy } from './auth.strategy';
           },
           inject: [ConfigService],
         }),
+        MailerModule.forRootAsync({
+          imports:[ConfigModule.forRoot({load: [configuration]})],
+          useFactory: async (config: ConfigService) => ({
+            transport: {
+              host: config.get('email.host'),
+              secure: false,
+              auth: {
+                user: config.get('email.user'),
+                pass: config.get('email.password'),
+              },
+            },
+            defaults: {
+              from: config.get('email.from'),
+            },
+            template: {
+              dir: './email',
+              adapter: new HandlebarsAdapter(),
+              options: {
+                strict: true,
+              },
+            },
+          }),
+          inject: [ConfigService],
+        })
     ],
     controllers: [AuthController],
     providers: [AuthService, UserRepository, JwtStrategy, UserValidation],
