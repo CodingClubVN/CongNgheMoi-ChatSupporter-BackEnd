@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { CacheInterceptor, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -13,6 +13,7 @@ import { AuthService } from './auth.service';
 import { JwtStrategy } from './auth.strategy';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
+import { APP_INTERCEPTOR } from '@nestjs/core';
 @Module({
     imports: [
         UserModule,
@@ -59,7 +60,12 @@ import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handleba
         })
     ],
     controllers: [AuthController],
-    providers: [AuthService, UserRepository, JwtStrategy, UserValidation],
+    providers: [AuthService, UserRepository, JwtStrategy, UserValidation, 
+      {
+      provide: APP_INTERCEPTOR,
+      useClass: CacheInterceptor,
+      }
+    ],
     exports: [AuthService]
 })
 export class AuthModule {}

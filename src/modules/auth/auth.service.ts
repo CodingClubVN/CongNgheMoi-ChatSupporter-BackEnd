@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { LoginRequestDto, UserCreateDto } from "../../dto";
+import { LoginRequestDto, SendOTPRequestDto, UserCreateDto } from "../../dto";
 import { UserRepository } from "../../repositories/user.repository";
 import * as bcrypt from 'bcrypt';
 import { JwtService } from "@nestjs/jwt";
@@ -14,7 +14,7 @@ export class AuthService {
         private mailerService: MailerService){}
 
     async login(account: LoginRequestDto) {
-        const user = await this.userRepository.findOneByUsername(account.username);
+        const user = await this.userRepository.findByUsernameOrEmailOrPhone(account.username, account.username, account.username);
         if (!user) {
             return null;
         }
@@ -23,8 +23,10 @@ export class AuthService {
         if (isMatch) {
             const payload = {userId: user._id}
             const token= this.generateToken(payload);
-
-            return {token,userId: user._id};
+            if (!user.isLoginFirst) {
+                await this.userRepository.updateIsloginFirst(user._id.toString());
+            }
+            return {token,userId: user._id, isLoginFirst: user.isLoginFirst};
         }else {
             return null;
         }
@@ -48,14 +50,14 @@ export class AuthService {
         return this.jwtService.sign(payload);
     }
 
-    async sendOTPComfirm() {
+    async sendOTPComfirm(otp: number, request: SendOTPRequestDto) {
         const res = await this.mailerService.sendMail({
-            to: 'thaihoc95x@gmail.com',
+            to: request.email,
             subject: 'Coding Club OTP confirm!',
             template: './otp-confirm',
             context: {
-                name: 'MR.Hira',
-                otp: '010291'
+                name: request.fullname,
+                otp: otp,
             }
         });
         console.log(res);
