@@ -7,8 +7,8 @@ export class UserValidation {
     constructor(private userRepository: UserRepository){}
 
     async checkValidateCreateUser(userReq: UserCreateDto) {
-        const userCheckUsername = await this.userRepository.findByEmailOrEmailOrPhone(userReq.email, userReq.account.username, userReq.phone);
-        if (userCheckUsername.length) {
+        const userCheckUsername = await this.userRepository.findByUsernameOrEmailOrPhone(userReq.email, userReq.account.username, userReq.phone);
+        if (userCheckUsername) {
             return 'username or email or phone exists!';
         }
         return '';
