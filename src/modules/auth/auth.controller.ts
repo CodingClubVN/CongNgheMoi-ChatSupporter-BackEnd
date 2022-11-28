@@ -13,7 +13,7 @@ export class AuthController{
     constructor (
         private authService: AuthService, 
         private userValidation: UserValidation,
-        @Inject(CACHE_MANAGER) private cacheManager: Cache) {}
+        @Inject(CACHE_MANAGER) private readonly cacheManager: Cache) {}
 
     @ApiOkResponse({
         status: 200,
@@ -85,8 +85,7 @@ export class AuthController{
             const otp = Math.floor(Math.random() * (999999 - 100000)) + 100000;
 
             await this.authService.sendOTPComfirm(otp, body);
-            await this.cacheManager.del(body.email);
-            await this.cacheManager.set(body.email, otp, 60);
+            await this.cacheManager.set(body.email, otp);
             console.log('========================> otp: ',otp);
             
             

@@ -1,4 +1,4 @@
-import { CacheInterceptor, Module } from '@nestjs/common';
+import { CacheInterceptor, CacheModule, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -14,6 +14,7 @@ import { JwtStrategy } from './auth.strategy';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { APP_INTERCEPTOR } from '@nestjs/core';
+import * as redisStore from 'cache-manager-redis-store';
 @Module({
     imports: [
         UserModule,
@@ -57,15 +58,23 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
             },
           }),
           inject: [ConfigService],
-        })
+        }),
+        CacheModule.registerAsync({
+          imports: [ConfigModule],
+          useFactory: async (configService: ConfigService) => ({
+            store: redisStore,
+            host: configService.get('redis.host'),
+            port: configService.get('redis.port'),
+            password: configService.get('redis.password'),
+            isGlobal: true,
+            database: 0,
+            ttl: 60
+          }),
+          inject: [ConfigService],
+        }),
     ],
     controllers: [AuthController],
-    providers: [AuthService, UserRepository, JwtStrategy, UserValidation, 
-      {
-      provide: APP_INTERCEPTOR,
-      useClass: CacheInterceptor,
-      }
-    ],
-    exports: [AuthService]
+    providers: [AuthService, UserRepository, JwtStrategy, UserValidation],
+    exports: []
 })
 export class AuthModule {}
