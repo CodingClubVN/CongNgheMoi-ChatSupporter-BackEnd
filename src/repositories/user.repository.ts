@@ -32,7 +32,7 @@ export class UserRepository {
         }
     }
 
-    async findByEmailOrEmailOrPhone(email: string, username: string, phone: string) {
+    async findByUsernameOrEmailOrPhone(email: string, username: string, phone: string) {
         try {
             const user = await this.userModel.find({
                 $or: [
@@ -41,7 +41,7 @@ export class UserRepository {
                     { phone }
                 ]
             });
-            return user;
+            return user[0];
         } catch (error) {
             throw new InternalServerErrorException(error);
         }
@@ -94,5 +94,14 @@ export class UserRepository {
         } catch (error) {
             throw new InternalServerErrorException(error);
         }
+    }
+
+    async updateIsloginFirst(id: string) {
+        await this.userModel.updateOne(
+            {_id: id},
+            {
+                $set: ({isLoginFirst: true})
+            }
+        )
     }
 }

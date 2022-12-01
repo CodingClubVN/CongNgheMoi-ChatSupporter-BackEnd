@@ -35,6 +35,9 @@ export class User extends Document {
 
     @Prop()
     createdAt: number;
+
+    @Prop({default: false})
+    isLoginFirst: boolean;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

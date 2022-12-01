@@ -1,15 +1,19 @@
-import { Body, Controller, HttpStatus, Post, Res } from "@nestjs/common";
+import { Body, CACHE_MANAGER, Controller, HttpStatus, Inject, Post, Res } from "@nestjs/common";
 import { ApiOkResponse, ApiResponse, ApiTags } from "@nestjs/swagger/dist";
 import { Response } from "express";
 import { UserValidation } from "../../validations";
-import { AuthResponseDto, BadRequestErrorDto, InternalServerErrorDTO, LoginRequestDto, Successful, UserCreatedResponse, UserCreateDto } from "../../dto";
+import { AuthResponseDto, BadRequestErrorDto, InternalServerErrorDTO, LoginRequestDto, SendOTPRequestDto, Successful, UserCreatedResponse, UserCreateDto, ValidateOTPRequestDto } from "../../dto";
 import { AuthService } from "./auth.service";
+import { Cache } from "cache-manager";
 
 
 @ApiTags('/api/auth')
 @Controller('api/auth')
 export class AuthController{
-    constructor (private authService: AuthService, private userValidation: UserValidation) {}
+    constructor (
+        private authService: AuthService, 
+        private userValidation: UserValidation,
+        @Inject(CACHE_MANAGER) private readonly cacheManager: Cache) {}
 
     @ApiOkResponse({
         status: 200,
@@ -76,10 +80,31 @@ export class AuthController{
     }
 
     @Post('send-otp')
-    async sendOTP(@Res() res: Response) {
+    async sendOTP(@Res() res: Response,@Body() body: SendOTPRequestDto) {
         try {
-            await this.authService.sendOTPComfirm();
+            const otp = Math.floor(Math.random() * (999999 - 100000)) + 100000;
+
+            await this.authService.sendOTPComfirm(otp, body);
+            await this.cacheManager.set(body.email, otp);
+            console.log('========================> otp: ',otp);
+            
+            
             return res.status(200).json(new Successful('OK'));
+        }catch(error) {
+            console.log(error);
+            return res.status(500).json(new InternalServerErrorDTO());  
+        }
+    }
+
+    @Post('validate-otp')
+    async validateOtp(@Res() res: Response, @Body() body: ValidateOTPRequestDto) {
+        try {
+            const otp = await this.cacheManager.get(body.email);
+            if (otp && otp.toString() === body.otp) {
+                return res.status(200).json(new Successful('OK'));
+            }else {
+                return res.status(400).json(new BadRequestErrorDto(['OTP invalid!']))
+            }
         }catch(error) {
             console.log(error);
             return res.status(500).json(new InternalServerErrorDTO());  
