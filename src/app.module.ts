@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule,ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
+import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import configuration from './config/configuration';
 import { AuthModule } from './modules/auth/auth.module';
@@ -16,9 +17,9 @@ import { EventSocketGateway } from './socket/socket.io';
     }),
     MongooseModule.forRootAsync({
       imports: [ConfigModule, 
-        // ServeStaticModule.forRoot({
-        //   rootPath: join(__dirname, '..', 'email'),
-        // }),
+        ServeStaticModule.forRoot({
+          rootPath: join(__dirname, '..', 'email'),
+        }),
       ],
       useFactory: async (config: ConfigService) => ({
        uri: config.get('database.url'),
