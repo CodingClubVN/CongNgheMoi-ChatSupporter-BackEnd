@@ -11,6 +11,13 @@ services:
             FIREBASE_PROJECT_ID: ${FIREBASE_PROJECT_ID}
             FIREBASE_PRIVATE_KEY: ${FIREBASE_PRIVATE_KEY}
             FIREBASE_EMAIL_CLIENT: ${FIREBASE_EMAIL_CLIENT}
+            MAIL_HOST: ${MAIL_HOST}
+            MAIL_USER: ${MAIL_USER}
+            MAIL_PASSWORD: ${MAIL_PASSWORD}
+            MAIL_FROM: ${MAIL_FROM}
+            REDIS_HOST: ${REDIS_HOST}
+            REDIS_PORT: ${REDIS_PORT}
+            REDIS_PASSWORD: ${REDIS_PASSWORD}
         build:
             context: .
             dockerfile: Dockerfile

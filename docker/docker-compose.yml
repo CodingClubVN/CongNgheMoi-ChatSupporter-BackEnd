@@ -2,7 +2,6 @@ version: '3'
 
 
 services:
-     # Redis
      redis:
        image: bitnami/redis:6.2
        environment:
@@ -10,8 +9,7 @@ services:
        ports:
          - "6379:6379"
        restart: unless-stopped
-
-    redis-commander:
+     redis-commander:
        image: rediscommander/redis-commander:latest
        environment:
          - REDIS_HOSTS=local:redis:6379:0:r3d1sp4ssw0rd
