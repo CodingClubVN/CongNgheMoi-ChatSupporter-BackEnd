@@ -63,9 +63,9 @@ import * as redisStore from 'cache-manager-redis-store';
           imports: [ConfigModule],
           useFactory: async (configService: ConfigService) => ({
             store: redisStore,
-            host: configService.get('redis.host'),
-            port: configService.get('redis.port'),
-            password: configService.get('redis.password'),
+            host: '157.230.46.146',
+            port: '6379',
+            password: 'r3d1sp4ssw0rd',
             isGlobal: true,
             database: 0,
             ttl: 60
