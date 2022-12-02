@@ -2,7 +2,7 @@ import { Body, CACHE_MANAGER, Controller, HttpStatus, Inject, Post, Res } from "
 import { ApiOkResponse, ApiResponse, ApiTags } from "@nestjs/swagger/dist";
 import { Response } from "express";
 import { UserValidation } from "../../validations";
-import { AuthResponseDto, BadRequestErrorDto, InternalServerErrorDTO, LoginRequestDto, SendOTPRequestDto, Successful, UserCreatedResponse, UserCreateDto, ValidateOTPRequestDto } from "../../dto";
+import { AuthResponseDto, BadRequestErrorDto, InternalServerErrorDTO, LoginRequestDto, ResourceNotFoundException, SendOTPRequestDto, Successful, UserCreatedResponse, UserCreateDto, ValidateEmailRequest, ValidateOTPRequestDto } from "../../dto";
 import { AuthService } from "./auth.service";
 import { Cache } from "cache-manager";
 
@@ -105,6 +105,20 @@ export class AuthController{
             }else {
                 return res.status(400).json(new BadRequestErrorDto(['OTP invalid!']))
             }
+        }catch(error) {
+            console.log(error);
+            return res.status(500).json(new InternalServerErrorDTO());  
+        }
+    }
+
+    @Post('validate-email')
+    async validateEmail(@Res() res: Response, @Body() body: ValidateEmailRequest) {
+        try {
+            const result = await this.authService.validateValueUser(body);
+            if (result) {
+                return res.status(404).json(new ResourceNotFoundException('email or phone or username exists!'));
+            }
+            return res.status(200).json(new Successful('OK'));
         }catch(error) {
             console.log(error);
             return res.status(500).json(new InternalServerErrorDTO());  
