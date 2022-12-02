@@ -10,6 +10,8 @@ export class MessageRepository {
     async createMessage(message: MessageCreateDto) {
         message.createdAt = new Date().getTime();
         const newMessage = await new this.messageModel(message).save();
+        console.log(newMessage);
+        
         return newMessage;
     }
 

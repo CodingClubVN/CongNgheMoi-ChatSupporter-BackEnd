@@ -1,7 +1,7 @@
 import { ApiBearerAuth, ApiOkResponse, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { Body, Controller, Get, Param, Post, Query, Req, Res, UseGuards } from "@nestjs/common";
 import { FriendService } from "./friend.service";
-import { FilterParamDto, FriendApproveDto, FriendRequestCreateDto, FriendRequestResponseDto, FriendResponseDto, InternalServerErrorDTO, ResourceNotFoundException, Successful } from "../../dto";
+import { FilterParamDto, FriendApproveDto, FriendRequestCreateDto, FriendRequestResponseDto, FriendResponseDto, InternalServerErrorDTO, ResourceNotFoundException, Successful, UnFriendRequest } from "../../dto";
 import { Response } from "express";
 import { JwtAuthGuard } from "../auth/auth.guard";
 @ApiBearerAuth()
@@ -155,6 +155,29 @@ export class FriendController {
             await this.friendService.removeFriendRequestAfterRequest(userId, toUserId);
             return res.status(200).json(new Successful('Removed'));
         } catch (error) {
+            console.log(error);
+            return res.status(500).json(new InternalServerErrorDTO());
+        }
+    }
+
+    @Post("/unfriend")
+    @ApiOkResponse({
+        status: 200,
+        type: Successful,
+    })
+    @ApiResponse({
+        status: 500,
+        description: 'error',
+        type: InternalServerErrorDTO,
+        isArray: false
+    })
+    @UseGuards(JwtAuthGuard)
+    async unfriend(@Req() req, @Res() res: Response,  @Body() body: UnFriendRequest) {
+        try {
+            const userId = req.user['userId'];
+            await this.friendService.removeFriend(userId, body.friendId);
+            return res.status(200).json(new Successful('OK'));
+        }catch (error) {
             console.log(error);
             return res.status(500).json(new InternalServerErrorDTO());
         }

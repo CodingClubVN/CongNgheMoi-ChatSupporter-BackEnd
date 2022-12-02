@@ -23,12 +23,7 @@ export class FriendRequestRepository {
     }
 
     async updateStatus(status: string, fromUserId: string, toUserId: string) {
-        await this.friendRequestModel.updateOne(
-            {fromUserId, toUserId},
-            {
-                $set: ({ status, updatedAt: new Date().getTime() })
-            }
-        );
+        await this.friendRequestModel.findOne({fromUserId, toUserId}).remove();
 
         return true;
     }

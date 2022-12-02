@@ -314,4 +314,15 @@ export class ConversationRepository {
             }
         );
     }
+
+    async findOneToOneByUserId(userId: string) {
+        const id = mongoose.Types.ObjectId(userId);
+        const conversations = await this.conversationModel.find(
+            {
+                conversationName: 'one-to-one-codingclub',
+                "users.userId": id
+            }
+        );
+        return conversations;
+    }
 }
