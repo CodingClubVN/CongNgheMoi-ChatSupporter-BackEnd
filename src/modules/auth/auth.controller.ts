@@ -121,7 +121,7 @@ export class AuthController{
             return res.status(200).json(new Successful('OK'));
         }catch(error) {
             console.log(error);
-            return res.status(500).json(new InternalServerErrorDTO());  
+            return res.status(500).json(new InternalServerErrorDTO());
         }
     }
 }

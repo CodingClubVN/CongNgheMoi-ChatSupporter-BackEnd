@@ -80,4 +80,29 @@ export class FriendService {
         this.socket.emitUpdateFriend(userId, data);
     }
 
+    async removeFriend(userId: string, friendId: string) {
+        const currentUser = await this.userRepository.findById(userId);
+        const fromUser = await this.userRepository.findById(friendId);
+        const conversations = await this.conversationRepository.findOneToOneByUserId(userId);
+        
+        for (let conversation of conversations) {
+            console.log(conversation.users.map(item => item.userId.toString()));
+            if (conversation.users.map(item => item.userId.toString()).includes(userId) && conversation.users.map(item => item.userId.toString()).includes(friendId)) {
+                
+                const conversationId = conversation._id;
+                const message: MessageCreateDto = {
+                    conversationId: conversationId,
+                    content: [currentUser.account.username + ' unfriend ' + fromUser.account.username],
+                    type: 'notification',
+                    fromUserId: userId
+                }
+        
+                await this.messageService.createMessage(message);
+            }
+        }
+        await this.friendRepository.removeFriend(userId, friendId);
+        await this.friendRepository.removeFriend(friendId, userId);
+
+        return true;
+    }
 }

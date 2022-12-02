@@ -116,8 +116,8 @@ export class FriendRepository {
         return list[0];
     }
 
-    async removeFriend(id: string) {
-        const friend = await this.friendModel.findOne({_id: id});
+    async removeFriend(userId: string, friendId: string) {
+        const friend = await this.friendModel.findOne({userId,friendId});
         await friend.remove();
     }
 }
