@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { LoginRequestDto, SendOTPRequestDto, UserCreateDto } from "../../dto";
+import { LoginRequestDto, SendOTPRequestDto, UserCreateDto, ValidateEmailRequest } from "../../dto";
 import { UserRepository } from "../../repositories/user.repository";
 import * as bcrypt from 'bcrypt';
 import { JwtService } from "@nestjs/jwt";
@@ -62,5 +62,13 @@ export class AuthService {
         });
         console.log(res);
         
+    }
+
+    async validateValueUser(data: ValidateEmailRequest) {
+        const user = await this.userRepository.findByUsernameOrEmailOrPhone(data.email, data.username, data.phone);
+        if (user) {
+            return true;
+        }
+        return false;
     }
 }
